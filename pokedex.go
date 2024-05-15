@@ -171,7 +171,31 @@ func main() {
 
 			Pokemon.Profile = Profile
 
-			//Multiplier
+			c.OnHTML("div.when-attacked", func(e *colly.HTMLElement) {
+				e.ForEach("div.when-attacked-row", func(_ int, h *colly.HTMLElement) {
+					var pokeType, pokeMult string
+					h.ForEach("span", func(_ int, l *colly.HTMLElement) {
+						if l.Attr("class") == "monster-type" {
+							CurrType := l.Text
+							if CurrType != "" {
+								pokeType = CurrType
+							}
+						} else if l.Attr("class") == "monster-multiplier" {
+							CurrMult := l.Text
+							if CurrMult != "" {
+								pokeMult = CurrMult
+							}
+
+							if pokeType != "" && pokeMult != "" {
+								Multiplier := Multiplier{}
+								Multiplier.DamageType = pokeType
+								Multiplier.DamageMult = pokeMult
+								Pokemon.DamageMultiplier = append(Pokemon.DamageMultiplier, Multiplier)
+							}
+						}
+					})
+				})
+			})
 
 		})
 
