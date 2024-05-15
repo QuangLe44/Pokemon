@@ -202,5 +202,5 @@ func main() {
 
 	})
 
-	c.Visit("https://jumia.com.ng/")
+	c.Visit("")
 }
