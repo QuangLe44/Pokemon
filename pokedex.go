@@ -192,7 +192,6 @@ func main() {
 				})
 			})
 
-			//evolution
 			c.OnHTML("div.evolutions", func(e *colly.HTMLElement) {
 				e.ForEach("div.evolution-row", func(_ int, l *colly.HTMLElement) {
 					c.OnHTML("div.evolution-label", func(h *colly.HTMLElement) {
@@ -201,6 +200,9 @@ func main() {
 					})
 				})
 			})
+
+			//Moves
+
 		})
 
 	})
