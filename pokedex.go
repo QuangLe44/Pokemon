@@ -41,11 +41,6 @@ type Multiplier struct {
 	DamageMult string
 }
 
-type Evolution struct {
-	EvoImage string
-	EvoInfo  string
-}
-
 type Moves struct {
 	MoveNum  string
 	MoveName string
@@ -60,7 +55,7 @@ type Pokemon struct {
 	GeneralInfo      General
 	Profile          Profile
 	DamageMultiplier []Multiplier
-	Evolution        []Evolution
+	Evolution        []string
 	Move             []Moves
 }
 
@@ -75,7 +70,7 @@ func main() {
 			Pokemon.Name = h.ChildText("span")
 			c.OnHTML("button[type=\"button\"]", func(e *colly.HTMLElement) {
 				style := e.Attr("style")
-				re := regexp.MustCompile(`background-image:\s*url\(["']?([^"')]+)["']?\)`)
+				re := regexp.MustCompile(`background-image:\s*url\(([^)]+)\)`)
 				match := re.FindStringSubmatch(style)
 				if len(match) > 1 {
 					Pokemon.Image = match[1]
@@ -198,6 +193,14 @@ func main() {
 			})
 
 			//evolution
+			c.OnHTML("div.evolutions", func(e *colly.HTMLElement) {
+				e.ForEach("div.evolution-row", func(_ int, l *colly.HTMLElement) {
+					c.OnHTML("div.evolution-label", func(h *colly.HTMLElement) {
+						Evoinfo := h.ChildText("span")
+						Pokemon.Evolution = append(Pokemon.Evolution, Evoinfo)
+					})
+				})
+			})
 		})
 
 	})
