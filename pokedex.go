@@ -45,7 +45,9 @@ type Moves struct {
 	MoveNum  string
 	MoveName string
 	MoveType string
-	MoveStat []string
+	Power    string
+	Acc      string
+	PP       string
 	MoveDesc string
 }
 
@@ -57,6 +59,7 @@ type Pokemon struct {
 	DamageMultiplier []Multiplier
 	Evolution        []string
 	Move             []Moves
+	BaseXp           string
 }
 
 func main() {
@@ -64,7 +67,7 @@ func main() {
 	c.SetRequestTimeout(120 * time.Second)
 	Pokedex := make([]Pokemon, 0)
 
-	c.OnHTML("div-monsters-list-wrapper ul-monsters-list", func(e *colly.HTMLElement) {
+	c.OnHTML("div-monsters-list-wrapper > ul-monsters-list", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(i int, h *colly.HTMLElement) {
 			Pokemon := Pokemon{}
 			Pokemon.Name = h.ChildText("span")
@@ -77,17 +80,17 @@ func main() {
 				}
 			})
 			GeneralInfo := General{}
-			c.OnHTML("div.detail-infobox div.detail-types-and-num div.detail-types", func(e *colly.HTMLElement) {
+			c.OnHTML("div.detail-infobox > div.detail-types-and-num > div.detail-types", func(e *colly.HTMLElement) {
 				e.ForEach("span", func(_ int, h *colly.HTMLElement) {
 					GenType := h.Text
 					GeneralInfo.Type = append(GeneralInfo.Type, GenType)
 				})
 			})
-			c.OnHTML("div.detail-infobox div.detail-types-and-num div.detail-national-id", func(e *colly.HTMLElement) {
+			c.OnHTML("div.detail-infobox > div.detail-types-and-num > div.detail-national-id", func(e *colly.HTMLElement) {
 				GeneralInfo.ID = e.ChildText("span")
 			})
 
-			c.OnHTML("div.detail-infobox div.detail-stats", func(e *colly.HTMLElement) {
+			c.OnHTML("div.detail-infobox > div.detail-stats", func(e *colly.HTMLElement) {
 				e.ForEach("div.detail-stats-row", func(_ int, h *colly.HTMLElement) {
 					Status := Stat{}
 					Status.StatName = h.ChildText("span:not([class])")
@@ -108,56 +111,56 @@ func main() {
 
 			Profile := Profile{}
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Height:" {
 					span := strong.DOM.Next()
 					Profile.Height = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Weight:" {
 					span := strong.DOM.Next()
 					Profile.Weight = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Catch Rate:" {
 					span := strong.DOM.Next()
 					Profile.CatchRate = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Gender Ratio:" {
 					span := strong.DOM.Next()
 					Profile.GenderRatio = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Egg Groups:" {
 					span := strong.DOM.Next()
 					Profile.EggGroups = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Hatch Steps:" {
 					span := strong.DOM.Next()
 					Profile.HatchSteps = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "Abilities:" {
 					span := strong.DOM.Next()
 					Profile.Abilities = span.Text()
 				}
 			})
 
-			c.OnHTML("div.monster-minutia strong", func(strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
 				if strings.TrimSpace(strong.Text) == "EVs:" {
 					span := strong.DOM.Next()
 					Profile.EVs = span.Text()
@@ -202,7 +205,58 @@ func main() {
 			})
 
 			//Moves
+			c.OnHTML("div.monster-moves", func(e *colly.HTMLElement) {
+				e.ForEach("div.moves-row", func(_ int, l *colly.HTMLElement) {
+					Moves := Moves{}
+					c.OnHTML("div.moves-inner-row", func(h *colly.HTMLElement) {
+						var MoveNum, MoveName, MoveType string
+						e.ForEach("span", func(i int, l *colly.HTMLElement) {
+							text := strings.TrimSpace(l.Text)
+							switch i {
+							case 0:
+								MoveNum = text
+							case 1:
+								MoveName = text
+							case 2:
+								MoveType = text
+							}
+						})
+						Moves.MoveNum = MoveNum
+						Moves.MoveName = MoveName
+						Moves.MoveType = MoveType
+					})
 
+					c.OnHTML("div.moves-row-detail > div.moves-row-stats", func(h *colly.HTMLElement) {
+						c.OnHTML("strong", func(strong *colly.HTMLElement) {
+							textList := []string{"Power:", "Acc:", "PP:"}
+							strongText := strings.TrimSpace(strong.Text)
+							for _, targetText := range textList {
+								if strongText == targetText {
+									span := strong.DOM.Next()
+									spanText := strings.TrimSpace(span.Text())
+									switch strongText {
+									case "Power:":
+										Moves.Power = spanText
+									case "Acc:":
+										Moves.Acc = spanText
+									case "PP:":
+										Moves.PP = spanText
+									}
+									break
+								}
+							}
+						})
+					})
+
+					c.OnHTML("div.moves-row-detail", func(h *colly.HTMLElement) {
+						c.OnHTML("move-description", func(l *colly.HTMLElement) {
+							Moves.MoveDesc = strings.TrimSpace(l.Text)
+						})
+					})
+
+					Pokemon.Move = append(Pokemon.Move, Moves)
+				})
+			})
 		})
 
 	})
