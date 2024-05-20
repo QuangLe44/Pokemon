@@ -65,10 +65,19 @@ type Pokemon struct {
 func main() {
 	c := colly.NewCollector()
 	c.SetRequestTimeout(120 * time.Second)
+	d := colly.NewCollector()
+	d.SetRequestTimeout(120 * time.Second)
+
 	Pokedex := make([]Pokemon, 0)
 
 	c.OnHTML("div-monsters-list-wrapper > ul-monsters-list", func(e *colly.HTMLElement) {
+		counter := 0
+		const limit = 10
 		e.ForEach("li", func(i int, h *colly.HTMLElement) {
+			if counter >= limit {
+				return
+			}
+
 			Pokemon := Pokemon{}
 			Pokemon.Name = h.ChildText("span")
 			c.OnHTML("button[type=\"button\"]", func(e *colly.HTMLElement) {
@@ -206,7 +215,13 @@ func main() {
 
 			//Moves
 			c.OnHTML("div.monster-moves", func(e *colly.HTMLElement) {
+				counter1 := 0
+				const limit = 10
 				e.ForEach("div.moves-row", func(_ int, l *colly.HTMLElement) {
+					if counter1 >= limit {
+						return
+					}
+
 					Moves := Moves{}
 					c.OnHTML("div.moves-inner-row", func(h *colly.HTMLElement) {
 						var MoveNum, MoveName, MoveType string
@@ -256,9 +271,31 @@ func main() {
 
 					Pokemon.Move = append(Pokemon.Move, Moves)
 				})
+
+				counter1++
 			})
+
+			counter++
 		})
 
+	})
+
+	d.OnHTML("div-mw-content-text > div.mw-parser-output > table.sortable roundy jquery-tablesorter > tbody", func(e *colly.HTMLElement) {
+		counter := 0
+		const limit = 10
+		Pokemon := Pokemon{}
+		e.ForEach("tr", func(i int, h *colly.HTMLElement) {
+			if counter >= limit {
+				return
+			}
+
+			tds := e.DOM.Find("td")
+			if tds.Length() >= 4 {
+				Pokemon.BaseXp = tds.Eq(3).Text()
+			}
+
+			counter++
+		})
 	})
 
 	c.OnRequest(func(r *colly.Request) {
@@ -273,8 +310,30 @@ func main() {
 		fmt.Println("Got this error:", e)
 	})
 
+	go func() {
+		c.Visit("https://pokedex.org/")
+	}()
+
+	go func() {
+		d.Visit("https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_effort_value_yield_(Generation_IX)")
+	}()
+
+	c.Wait()
+	d.Wait()
+
+	var fin1 = 0
+	var fin2 = 0
+
 	c.OnScraped(func(r *colly.Response) {
 		fmt.Println("Finished", r.Request.URL)
+		fin1 = 1
+	})
+	d.OnScraped(func(r *colly.Response) {
+		fmt.Println("Finished", r.Request.URL)
+		fin2 = 1
+	})
+
+	if fin1 == 1 && fin2 == 1 {
 		js, err := json.MarshalIndent(Pokedex, "", "    ")
 		if err != nil {
 			log.Fatal(err)
@@ -283,8 +342,5 @@ func main() {
 		if err := os.WriteFile("pokedex.json", js, 0664); err == nil {
 			fmt.Println("Data written to file successfully")
 		}
-
-	})
-
-	c.Visit("")
+	}
 }
