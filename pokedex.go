@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -72,7 +72,7 @@ func fetchHTML(url string) (*html.Node, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -172,9 +172,8 @@ func main() {
 				}
 			}
 
-			detailInfobox := findNodeByAttr(li, "class", "detail-infobox")
+			detailInfobox := findNodeByAttr(root, "class", "detail-infobox")
 			if detailInfobox != nil {
-				// General Information
 				generalInfo := General{}
 				types := findNodeByAttr(detailInfobox, "class", "detail-types")
 				if types != nil {
@@ -200,40 +199,44 @@ func main() {
 					}
 				}
 
-				species := findNodeByAttr(detailInfobox, "class", "monster-species")
+				species := findNodeByAttr(root, "class", "monster-species")
 				if species != nil {
 					generalInfo.Species = extractText(species)
 				}
 
-				desc := findNodeByAttr(detailInfobox, "class", "monster-description")
+				desc := findNodeByAttr(root, "class", "monster-description")
 				if desc != nil {
 					generalInfo.Desc = extractText(desc)
 				}
 				pokemon.GeneralInfo = generalInfo
 
 				// Profile
-				profile := Profile{}
-				for _, strong := range findNodesByTag(detailInfobox, atom.Strong) {
-					switch strings.TrimSpace(extractText(strong)) {
-					case "Height:":
-						profile.Height = extractText(strong.NextSibling)
-					case "Weight:":
-						profile.Weight = extractText(strong.NextSibling)
-					case "Catch Rate:":
-						profile.CatchRate = extractText(strong.NextSibling)
-					case "Gender Ratio:":
-						profile.GenderRatio = extractText(strong.NextSibling)
-					case "Egg Groups:":
-						profile.EggGroups = extractText(strong.NextSibling)
-					case "Hatch Steps:":
-						profile.HatchSteps = extractText(strong.NextSibling)
-					case "Abilities:":
-						profile.Abilities = extractText(strong.NextSibling)
-					case "EVs:":
-						profile.EVs = extractText(strong.NextSibling)
+				detail := findNodeByAttr(root, "class", "detail-below-header")
+				if detail != nil {
+					profile := Profile{}
+					for _, strong := range findNodesByTag(detail, atom.Strong) {
+						switch strings.TrimSpace(extractText(strong)) {
+						case "Height:":
+							profile.Height = extractText(strong.NextSibling)
+						case "Weight:":
+							profile.Weight = extractText(strong.NextSibling)
+						case "Catch Rate:":
+							profile.CatchRate = extractText(strong.NextSibling)
+						case "Gender Ratio:":
+							profile.GenderRatio = extractText(strong.NextSibling)
+						case "Egg Groups:":
+							profile.EggGroups = extractText(strong.NextSibling)
+						case "Hatch Steps:":
+							profile.HatchSteps = extractText(strong.NextSibling)
+						case "Abilities:":
+							profile.Abilities = extractText(strong.NextSibling)
+						case "EVs:":
+							profile.EVs = extractText(strong.NextSibling)
+						}
 					}
+					pokemon.Profile = profile
 				}
-				pokemon.Profile = profile
+
 			}
 
 			Pokedex = append(Pokedex, pokemon)
@@ -246,17 +249,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tbody := findNodeByTag(bulbapediaRoot, atom.Tbody)
-	if tbody != nil {
-		rows := findNodesByTag(tbody, atom.Tr)
-		for i, row := range rows {
-			if i >= limit {
-				break
-			}
-			cols := findNodesByTag(row, atom.Td)
-			if len(cols) >= 4 {
-				baseXp := extractText(cols[3])
-				Pokedex[i].BaseXp = baseXp
+	XP := findNodeByAttr(bulbapediaRoot, "class", "sortable.roundy.jquery-tablesorter")
+	if XP != nil {
+		tbody := findNodeByTag(XP, atom.Tbody)
+		if tbody != nil {
+			for i, row := range findNodesByTag(tbody, atom.Tr) {
+				if i >= limit {
+					break
+				}
+				cols := findNodesByTag(row, atom.Td)
+				if len(cols) >= 4 {
+					baseXp := extractText(cols[3])
+					Pokedex[i].BaseXp = baseXp
+				}
 			}
 		}
 	}

@@ -3,21 +3,49 @@
         "Name": "Bulbasaur",
         "Image": "",
         "GeneralInfo": {
-            "ID": "",
-            "Type": null,
-            "Stat": null,
-            "Species": "",
-            "Desc": ""
+            "ID": "#1",
+            "Type": [
+                "grass",
+                "poison"
+            ],
+            "Stat": [
+                {
+                    "StatName": "HP",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Attack",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Defense",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Speed",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Sp Atk",
+                    "StatNum": "65"
+                },
+                {
+                    "StatName": "Sp Def",
+                    "StatNum": "65"
+                }
+            ],
+            "Species": "Seed Pokémon",
+            "Desc": "For some time after its birth, it grows by gaining nourishment from the seed on its back."
         },
         "Profile": {
-            "Height": "",
-            "Weight": "",
-            "CatchRate": "",
-            "GenderRatio": "",
+            "Height": "0.7 m",
+            "Weight": "6.9 kg",
+            "CatchRate": "0%",
+            "GenderRatio": "87.5% ♂ 12.5% ♀",
             "EggGroups": "",
-            "HatchSteps": "",
-            "Abilities": "",
-            "EVs": ""
+            "HatchSteps": "5100",
+            "Abilities": "Chlorophyll, Overgrow",
+            "EVs": "1 Sp Att"
         },
         "DamageMultiplier": null,
         "Evolution": null,
@@ -28,21 +56,49 @@
         "Name": "Ivysaur",
         "Image": "",
         "GeneralInfo": {
-            "ID": "",
-            "Type": null,
-            "Stat": null,
-            "Species": "",
-            "Desc": ""
+            "ID": "#1",
+            "Type": [
+                "grass",
+                "poison"
+            ],
+            "Stat": [
+                {
+                    "StatName": "HP",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Attack",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Defense",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Speed",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Sp Atk",
+                    "StatNum": "65"
+                },
+                {
+                    "StatName": "Sp Def",
+                    "StatNum": "65"
+                }
+            ],
+            "Species": "Seed Pokémon",
+            "Desc": "For some time after its birth, it grows by gaining nourishment from the seed on its back."
         },
         "Profile": {
-            "Height": "",
-            "Weight": "",
-            "CatchRate": "",
-            "GenderRatio": "",
+            "Height": "0.7 m",
+            "Weight": "6.9 kg",
+            "CatchRate": "0%",
+            "GenderRatio": "87.5% ♂ 12.5% ♀",
             "EggGroups": "",
-            "HatchSteps": "",
-            "Abilities": "",
-            "EVs": ""
+            "HatchSteps": "5100",
+            "Abilities": "Chlorophyll, Overgrow",
+            "EVs": "1 Sp Att"
         },
         "DamageMultiplier": null,
         "Evolution": null,
@@ -53,21 +109,49 @@
         "Name": "Venusaur",
         "Image": "",
         "GeneralInfo": {
-            "ID": "",
-            "Type": null,
-            "Stat": null,
-            "Species": "",
-            "Desc": ""
+            "ID": "#1",
+            "Type": [
+                "grass",
+                "poison"
+            ],
+            "Stat": [
+                {
+                    "StatName": "HP",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Attack",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Defense",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Speed",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Sp Atk",
+                    "StatNum": "65"
+                },
+                {
+                    "StatName": "Sp Def",
+                    "StatNum": "65"
+                }
+            ],
+            "Species": "Seed Pokémon",
+            "Desc": "For some time after its birth, it grows by gaining nourishment from the seed on its back."
         },
         "Profile": {
-            "Height": "",
-            "Weight": "",
-            "CatchRate": "",
-            "GenderRatio": "",
+            "Height": "0.7 m",
+            "Weight": "6.9 kg",
+            "CatchRate": "0%",
+            "GenderRatio": "87.5% ♂ 12.5% ♀",
             "EggGroups": "",
-            "HatchSteps": "",
-            "Abilities": "",
-            "EVs": ""
+            "HatchSteps": "5100",
+            "Abilities": "Chlorophyll, Overgrow",
+            "EVs": "1 Sp Att"
         },
         "DamageMultiplier": null,
         "Evolution": null,
@@ -78,21 +162,49 @@
         "Name": "Charmander",
         "Image": "",
         "GeneralInfo": {
-            "ID": "",
-            "Type": null,
-            "Stat": null,
-            "Species": "",
-            "Desc": ""
+            "ID": "#1",
+            "Type": [
+                "grass",
+                "poison"
+            ],
+            "Stat": [
+                {
+                    "StatName": "HP",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Attack",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Defense",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Speed",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Sp Atk",
+                    "StatNum": "65"
+                },
+                {
+                    "StatName": "Sp Def",
+                    "StatNum": "65"
+                }
+            ],
+            "Species": "Seed Pokémon",
+            "Desc": "For some time after its birth, it grows by gaining nourishment from the seed on its back."
         },
         "Profile": {
-            "Height": "",
-            "Weight": "",
-            "CatchRate": "",
-            "GenderRatio": "",
+            "Height": "0.7 m",
+            "Weight": "6.9 kg",
+            "CatchRate": "0%",
+            "GenderRatio": "87.5% ♂ 12.5% ♀",
             "EggGroups": "",
-            "HatchSteps": "",
-            "Abilities": "",
-            "EVs": ""
+            "HatchSteps": "5100",
+            "Abilities": "Chlorophyll, Overgrow",
+            "EVs": "1 Sp Att"
         },
         "DamageMultiplier": null,
         "Evolution": null,
@@ -103,21 +215,49 @@
         "Name": "Charmeleon",
         "Image": "",
         "GeneralInfo": {
-            "ID": "",
-            "Type": null,
-            "Stat": null,
-            "Species": "",
-            "Desc": ""
+            "ID": "#1",
+            "Type": [
+                "grass",
+                "poison"
+            ],
+            "Stat": [
+                {
+                    "StatName": "HP",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Attack",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Defense",
+                    "StatNum": "49"
+                },
+                {
+                    "StatName": "Speed",
+                    "StatNum": "45"
+                },
+                {
+                    "StatName": "Sp Atk",
+                    "StatNum": "65"
+                },
+                {
+                    "StatName": "Sp Def",
+                    "StatNum": "65"
+                }
+            ],
+            "Species": "Seed Pokémon",
+            "Desc": "For some time after its birth, it grows by gaining nourishment from the seed on its back."
         },
         "Profile": {
-            "Height": "",
-            "Weight": "",
-            "CatchRate": "",
-            "GenderRatio": "",
+            "Height": "0.7 m",
+            "Weight": "6.9 kg",
+            "CatchRate": "0%",
+            "GenderRatio": "87.5% ♂ 12.5% ♀",
             "EggGroups": "",
-            "HatchSteps": "",
-            "Abilities": "",
-            "EVs": ""
+            "HatchSteps": "5100",
+            "Abilities": "Chlorophyll, Overgrow",
+            "EVs": "1 Sp Att"
         },
         "DamageMultiplier": null,
         "Evolution": null,
