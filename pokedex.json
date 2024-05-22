@@ -1,0 +1,127 @@
+[
+    {
+        "Name": "Bulbasaur",
+        "Image": "",
+        "GeneralInfo": {
+            "ID": "",
+            "Type": null,
+            "Stat": null,
+            "Species": "",
+            "Desc": ""
+        },
+        "Profile": {
+            "Height": "",
+            "Weight": "",
+            "CatchRate": "",
+            "GenderRatio": "",
+            "EggGroups": "",
+            "HatchSteps": "",
+            "Abilities": "",
+            "EVs": ""
+        },
+        "DamageMultiplier": null,
+        "Evolution": null,
+        "Move": null,
+        "BaseXp": ""
+    },
+    {
+        "Name": "Ivysaur",
+        "Image": "",
+        "GeneralInfo": {
+            "ID": "",
+            "Type": null,
+            "Stat": null,
+            "Species": "",
+            "Desc": ""
+        },
+        "Profile": {
+            "Height": "",
+            "Weight": "",
+            "CatchRate": "",
+            "GenderRatio": "",
+            "EggGroups": "",
+            "HatchSteps": "",
+            "Abilities": "",
+            "EVs": ""
+        },
+        "DamageMultiplier": null,
+        "Evolution": null,
+        "Move": null,
+        "BaseXp": ""
+    },
+    {
+        "Name": "Venusaur",
+        "Image": "",
+        "GeneralInfo": {
+            "ID": "",
+            "Type": null,
+            "Stat": null,
+            "Species": "",
+            "Desc": ""
+        },
+        "Profile": {
+            "Height": "",
+            "Weight": "",
+            "CatchRate": "",
+            "GenderRatio": "",
+            "EggGroups": "",
+            "HatchSteps": "",
+            "Abilities": "",
+            "EVs": ""
+        },
+        "DamageMultiplier": null,
+        "Evolution": null,
+        "Move": null,
+        "BaseXp": ""
+    },
+    {
+        "Name": "Charmander",
+        "Image": "",
+        "GeneralInfo": {
+            "ID": "",
+            "Type": null,
+            "Stat": null,
+            "Species": "",
+            "Desc": ""
+        },
+        "Profile": {
+            "Height": "",
+            "Weight": "",
+            "CatchRate": "",
+            "GenderRatio": "",
+            "EggGroups": "",
+            "HatchSteps": "",
+            "Abilities": "",
+            "EVs": ""
+        },
+        "DamageMultiplier": null,
+        "Evolution": null,
+        "Move": null,
+        "BaseXp": ""
+    },
+    {
+        "Name": "Charmeleon",
+        "Image": "",
+        "GeneralInfo": {
+            "ID": "",
+            "Type": null,
+            "Stat": null,
+            "Species": "",
+            "Desc": ""
+        },
+        "Profile": {
+            "Height": "",
+            "Weight": "",
+            "CatchRate": "",
+            "GenderRatio": "",
+            "EggGroups": "",
+            "HatchSteps": "",
+            "Abilities": "",
+            "EVs": ""
+        },
+        "DamageMultiplier": null,
+        "Evolution": null,
+        "Move": null,
+        "BaseXp": ""
+    }
+]
