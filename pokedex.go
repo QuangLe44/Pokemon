@@ -99,6 +99,26 @@ func extractAttribute(n *html.Node, attrName string) string {
 	return ""
 }
 
+func findNodeByClass(root *html.Node, className string) *html.Node {
+	var find func(n *html.Node) *html.Node
+	find = func(n *html.Node) *html.Node {
+		if n.Type == html.ElementNode {
+			for _, attr := range n.Attr {
+				if attr.Key == "class" && strings.Contains(attr.Val, className) {
+					return n
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			if result := find(c); result != nil {
+				return result
+			}
+		}
+		return nil
+	}
+	return find(root)
+}
+
 func findNodeByAttr(n *html.Node, attrName, attrValue string) *html.Node {
 	if n.Type == html.ElementNode {
 		for _, attr := range n.Attr {
@@ -249,7 +269,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	XP := findNodeByAttr(bulbapediaRoot, "class", "sortable.roundy.jquery-tablesorter")
+	XP := findNodeByClass(bulbapediaRoot, "sortable roundy jquery-tablesorter")
 	if XP != nil {
 		tbody := findNodeByTag(XP, atom.Tbody)
 		if tbody != nil {
@@ -258,10 +278,8 @@ func main() {
 					break
 				}
 				cols := findNodesByTag(row, atom.Td)
-				if len(cols) >= 4 {
-					baseXp := extractText(cols[3])
-					Pokedex[i].BaseXp = baseXp
-				}
+				baseXp := extractText(cols[3])
+				Pokedex[i].BaseXp = baseXp
 			}
 		}
 	}
