@@ -70,71 +70,116 @@ func main() {
 
 	Pokedex := make([]Pokemon, 0)
 
-	c.OnHTML("div.monsters-list-wrapper > ul.monsters-list", func(e *colly.HTMLElement) {
+	c.OnHTML("#monsters-list-wrapper > #monsters-list", func(e *colly.HTMLElement) {
 		counter := 0
 		const limit = 5
 		e.ForEach("li", func(i int, h *colly.HTMLElement) {
 			if counter >= limit {
 				return
 			}
+
 			Pokemon := Pokemon{}
 			Pokemon.Name = h.ChildText("span")
-
-			// Nested collector to get details of each Pokemon
-			detailCollector := c.Clone()
-			detailCollector.OnHTML("div.monster-details", func(e *colly.HTMLElement) {
-				// Image
-				style := e.ChildAttr("button[type=\"button\"]", "style")
+			c.OnHTML("button[type=\"button\"]", func(e *colly.HTMLElement) {
+				style := e.Attr("style")
 				re := regexp.MustCompile(`background-image:\s*url\(([^)]+)\)`)
 				match := re.FindStringSubmatch(style)
 				if len(match) > 1 {
 					Pokemon.Image = match[1]
 				}
-
-				// General Info
-				GeneralInfo := General{}
-				e.ForEach("div.detail-types-and-num > div.detail-types > span", func(_ int, h *colly.HTMLElement) {
+			})
+			GeneralInfo := General{}
+			c.OnHTML("div.detail-infobox > div.detail-types-and-num > div.detail-types", func(e *colly.HTMLElement) {
+				e.ForEach("span", func(_ int, h *colly.HTMLElement) {
 					GenType := h.Text
 					GeneralInfo.Type = append(GeneralInfo.Type, GenType)
 				})
-				GeneralInfo.ID = e.ChildText("div.detail-types-and-num > div.detail-national-id > span")
-				e.ForEach("div.detail-stats > div.detail-stats-row", func(_ int, h *colly.HTMLElement) {
+			})
+			c.OnHTML("div.detail-infobox > div.detail-types-and-num > div.detail-national-id", func(e *colly.HTMLElement) {
+				GeneralInfo.ID = e.ChildText("span")
+			})
+
+			c.OnHTML("div.detail-infobox > div.detail-stats", func(e *colly.HTMLElement) {
+				e.ForEach("div.detail-stats-row", func(_ int, h *colly.HTMLElement) {
 					Status := Stat{}
 					Status.StatName = h.ChildText("span:not([class])")
 					Status.StatNum = h.ChildText("span.stat-bar")
 					GeneralInfo.Stat = append(GeneralInfo.Stat, Status)
 				})
-				GeneralInfo.Species = e.ChildText("div.monster-species")
-				GeneralInfo.Desc = e.ChildText("div.monster-description")
-				Pokemon.GeneralInfo = GeneralInfo
+			})
 
-				// Profile
-				Profile := Profile{}
-				e.ForEach("div.monster-minutia > strong", func(_ int, strong *colly.HTMLElement) {
+			c.OnHTML("div.monster-species", func(e *colly.HTMLElement) {
+				GeneralInfo.Species = e.Text
+			})
+
+			c.OnHTML("div.monster-description", func(e *colly.HTMLElement) {
+				GeneralInfo.Desc = e.Text
+			})
+
+			Pokemon.GeneralInfo = GeneralInfo
+
+			Profile := Profile{}
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Height:" {
 					span := strong.DOM.Next()
-					switch strings.TrimSpace(strong.Text) {
-					case "Height:":
-						Profile.Height = span.Text()
-					case "Weight:":
-						Profile.Weight = span.Text()
-					case "Catch Rate:":
-						Profile.CatchRate = span.Text()
-					case "Gender Ratio:":
-						Profile.GenderRatio = span.Text()
-					case "Egg Groups:":
-						Profile.EggGroups = span.Text()
-					case "Hatch Steps:":
-						Profile.HatchSteps = span.Text()
-					case "Abilities:":
-						Profile.Abilities = span.Text()
-					case "EVs:":
-						Profile.EVs = span.Text()
-					}
-				})
-				Pokemon.Profile = Profile
+					Profile.Height = span.Text()
+				}
+			})
 
-				// Damage Multiplier
-				e.ForEach("div.when-attacked > div.when-attacked-row", func(_ int, h *colly.HTMLElement) {
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Weight:" {
+					span := strong.DOM.Next()
+					Profile.Weight = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Catch Rate:" {
+					span := strong.DOM.Next()
+					Profile.CatchRate = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Gender Ratio:" {
+					span := strong.DOM.Next()
+					Profile.GenderRatio = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Egg Groups:" {
+					span := strong.DOM.Next()
+					Profile.EggGroups = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Hatch Steps:" {
+					span := strong.DOM.Next()
+					Profile.HatchSteps = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "Abilities:" {
+					span := strong.DOM.Next()
+					Profile.Abilities = span.Text()
+				}
+			})
+
+			c.OnHTML("div.monster-minutia > strong", func(strong *colly.HTMLElement) {
+				if strings.TrimSpace(strong.Text) == "EVs:" {
+					span := strong.DOM.Next()
+					Profile.EVs = span.Text()
+				}
+			})
+
+			Pokemon.Profile = Profile
+
+			c.OnHTML("div.when-attacked", func(e *colly.HTMLElement) {
+				e.ForEach("div.when-attacked-row", func(_ int, h *colly.HTMLElement) {
 					var pokeType, pokeMult string
 					h.ForEach("span", func(_ int, l *colly.HTMLElement) {
 						if l.Attr("class") == "monster-type" {
@@ -147,6 +192,7 @@ func main() {
 							if CurrMult != "" {
 								pokeMult = CurrMult
 							}
+
 							if pokeType != "" && pokeMult != "" {
 								Multiplier := Multiplier{}
 								Multiplier.DamageType = pokeType
@@ -156,62 +202,98 @@ func main() {
 						}
 					})
 				})
+			})
 
-				// Evolution
-				e.ForEach("div.evolutions > div.evolution-row", func(_ int, l *colly.HTMLElement) {
-					Evoinfo := l.ChildText("div.evolution-label > span")
-					Pokemon.Evolution = append(Pokemon.Evolution, Evoinfo)
+			c.OnHTML("div.evolutions", func(e *colly.HTMLElement) {
+				e.ForEach("div.evolution-row", func(_ int, l *colly.HTMLElement) {
+					c.OnHTML("div.evolution-label", func(h *colly.HTMLElement) {
+						Evoinfo := h.ChildText("span")
+						Pokemon.Evolution = append(Pokemon.Evolution, Evoinfo)
+					})
 				})
+			})
 
-				// Moves
-				e.ForEach("div.monster-moves > div.moves-row", func(_ int, l *colly.HTMLElement) {
+			//Moves
+			c.OnHTML("div.monster-moves", func(e *colly.HTMLElement) {
+				counter1 := 0
+				const limit = 5
+				e.ForEach("div.moves-row", func(_ int, l *colly.HTMLElement) {
+					if counter1 >= limit {
+						return
+					}
+
 					Moves := Moves{}
-					l.ForEach("div.moves-inner-row > span", func(i int, h *colly.HTMLElement) {
-						text := strings.TrimSpace(h.Text)
-						switch i {
-						case 0:
-							Moves.MoveNum = text
-						case 1:
-							Moves.MoveName = text
-						case 2:
-							Moves.MoveType = text
-						}
+					c.OnHTML("div.moves-inner-row", func(h *colly.HTMLElement) {
+						var MoveNum, MoveName, MoveType string
+						e.ForEach("span", func(i int, l *colly.HTMLElement) {
+							text := strings.TrimSpace(l.Text)
+							switch i {
+							case 0:
+								MoveNum = text
+							case 1:
+								MoveName = text
+							case 2:
+								MoveType = text
+							}
+						})
+						Moves.MoveNum = MoveNum
+						Moves.MoveName = MoveName
+						Moves.MoveType = MoveType
 					})
-					l.ForEach("div.moves-row-detail > div.moves-row-stats > strong", func(_ int, strong *colly.HTMLElement) {
-						span := strong.DOM.Next()
-						switch strings.TrimSpace(strong.Text) {
-						case "Power:":
-							Moves.Power = span.Text()
-						case "Acc:":
-							Moves.Acc = span.Text()
-						case "PP:":
-							Moves.PP = span.Text()
-						}
+
+					c.OnHTML("div.moves-row-detail > div.moves-row-stats", func(h *colly.HTMLElement) {
+						c.OnHTML("strong", func(strong *colly.HTMLElement) {
+							textList := []string{"Power:", "Acc:", "PP:"}
+							strongText := strings.TrimSpace(strong.Text)
+							for _, targetText := range textList {
+								if strongText == targetText {
+									span := strong.DOM.Next()
+									spanText := strings.TrimSpace(span.Text())
+									switch strongText {
+									case "Power:":
+										Moves.Power = spanText
+									case "Acc:":
+										Moves.Acc = spanText
+									case "PP:":
+										Moves.PP = spanText
+									}
+									break
+								}
+							}
+						})
 					})
-					Moves.MoveDesc = l.ChildText("div.moves-row-detail > move-description")
+
+					c.OnHTML("div.moves-row-detail", func(h *colly.HTMLElement) {
+						c.OnHTML("move-description", func(l *colly.HTMLElement) {
+							Moves.MoveDesc = strings.TrimSpace(l.Text)
+						})
+					})
+
 					Pokemon.Move = append(Pokemon.Move, Moves)
 				})
 
-				Pokedex = append(Pokedex, Pokemon)
+				counter1++
 			})
-
-			detailCollector.Visit(h.ChildAttr("a", "href"))
 
 			counter++
 		})
+
 	})
 
-	d.OnHTML("div.mw-content-text > div.mw-parser-output > table.sortable.roundy.jquery-tablesorter > tbody", func(e *colly.HTMLElement) {
+	d.OnHTML("#mw-content-text > div.mw-parser-output > table.sortable.roundy.jquery-tablesorter > tbody", func(e *colly.HTMLElement) {
 		counter := 0
 		const limit = 5
+		Pokemon := Pokemon{}
 		e.ForEach("tr", func(i int, h *colly.HTMLElement) {
 			if counter >= limit {
 				return
 			}
-			tds := h.DOM.Find("td")
+
+			tds := e.DOM.Find("td")
 			if tds.Length() >= 4 {
-				Pokedex[i].BaseXp = tds.Eq(3).Text()
+				Pokemon.BaseXp = tds.Eq(3).Text()
 			}
+
 			counter++
 		})
 	})
