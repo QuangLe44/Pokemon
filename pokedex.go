@@ -99,30 +99,22 @@ func extractAttribute(n *html.Node, attrName string) string {
 	return ""
 }
 
-func findNodeByClass(root *html.Node, className string) *html.Node {
-	var find func(n *html.Node) *html.Node
-	find = func(n *html.Node) *html.Node {
-		if n.Type == html.ElementNode {
-			for _, attr := range n.Attr {
-				if attr.Key == "class" && strings.Contains(attr.Val, className) {
-					return n
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			if result := find(c); result != nil {
-				return result
-			}
-		}
-		return nil
+func extractBackgroundImageURL(style string) string {
+	re := regexp.MustCompile(`background-image:\s*url\(([^)]+)\)`)
+	match := re.FindStringSubmatch(style)
+	if len(match) > 1 {
+		return match[1]
 	}
-	return find(root)
+	return ""
 }
 
 func findNodeByAttr(n *html.Node, attrName, attrValue string) *html.Node {
+	if n == nil {
+		return nil
+	}
 	if n.Type == html.ElementNode {
 		for _, attr := range n.Attr {
-			if attr.Key == attrName && attr.Val == attrValue {
+			if attr.Key == attrName && strings.Contains(attr.Val, attrValue) {
 				return n
 			}
 		}
@@ -136,6 +128,9 @@ func findNodeByAttr(n *html.Node, attrName, attrValue string) *html.Node {
 }
 
 func findNodeByTag(n *html.Node, tag atom.Atom) *html.Node {
+	if n == nil {
+		return nil
+	}
 	if n.DataAtom == tag {
 		return n
 	}
@@ -159,108 +154,188 @@ func findNodesByTag(n *html.Node, tag atom.Atom) []*html.Node {
 }
 
 func main() {
-	pokedexURL := "https://pokedex.org/"
 	bulbapediaURL := "https://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_effort_value_yield_(Generation_IX)"
 	const limit = 5
-
-	root, err := fetchHTML(pokedexURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	var i int
 	var Pokedex []Pokemon
-	monstersList := findNodeByAttr(root, "id", "monsters-list")
-	if monstersList != nil {
-		liNodes := findNodesByTag(monstersList, atom.Li)
-		for i, li := range liNodes {
-			if i >= limit {
-				break
-			}
+	for i = 1; i <= 5; i++ {
+		pokedexURL := fmt.Sprintf("https://pokedex.org/#/pokemon/%d", i)
+		root, err := fetchHTML(pokedexURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		monstersList := findNodeByAttr(root, "class", "mui-panel")
+		if monstersList != nil {
 			pokemon := Pokemon{}
-			span := findNodeByTag(li, atom.Span)
-			if span != nil {
-				pokemon.Name = extractText(span)
+			h1 := findNodeByTag(monstersList, atom.H1)
+			if h1 != nil {
+				pokemon.Name = extractText(h1)
 			}
 
-			button := findNodeByTag(li, atom.Button)
-			if button != nil {
-				style := extractAttribute(button, "style")
-				re := regexp.MustCompile(`background-image:\s*url\(([^)]+)\)`)
-				match := re.FindStringSubmatch(style)
-				if len(match) > 1 {
-					pokemon.Image = match[1]
-				}
+			divImg := findNodeByAttr(monstersList, "class", "detail-sprite")
+			if divImg != nil {
+				style := extractAttribute(divImg, "style")
+				pokemon.Image = extractBackgroundImageURL(style)
 			}
 
-			detailInfobox := findNodeByAttr(root, "class", "detail-infobox")
-			if detailInfobox != nil {
-				generalInfo := General{}
-				types := findNodeByAttr(detailInfobox, "class", "detail-types")
-				if types != nil {
-					for _, span := range findNodesByTag(types, atom.Span) {
-						generalInfo.Type = append(generalInfo.Type, extractText(span))
+			content := findNodeByAttr(root, "class", "detail-panel-content")
+			if content != nil {
+				detailInfobox := findNodeByAttr(content, "class", "detail-infobox")
+				if detailInfobox != nil {
+					generalInfo := General{}
+					types := findNodeByAttr(detailInfobox, "class", "detail-types")
+					if types != nil {
+						for _, span := range findNodesByTag(types, atom.Span) {
+							generalInfo.Type = append(generalInfo.Type, extractText(span))
+						}
+					}
+
+					nationalID := findNodeByAttr(detailInfobox, "class", "detail-national-id")
+					if nationalID != nil {
+						generalInfo.ID = extractText(findNodeByTag(nationalID, atom.Span))
+					}
+
+					stats := findNodeByAttr(detailInfobox, "class", "detail-stats")
+					if stats != nil {
+						for _, statRow := range findNodesByTag(stats, atom.Div) {
+							if extractAttribute(statRow, "class") == "detail-stats-row" {
+								stat := Stat{}
+								stat.StatName = extractText(statRow.FirstChild)
+								stat.StatNum = extractText(statRow.LastChild)
+								generalInfo.Stat = append(generalInfo.Stat, stat)
+							}
+						}
+					}
+
+					species := findNodeByAttr(root, "class", "monster-species")
+					if species != nil {
+						generalInfo.Species = extractText(species)
+					}
+
+					desc := findNodeByAttr(root, "class", "monster-description")
+					if desc != nil {
+						generalInfo.Desc = extractText(desc)
+					}
+					pokemon.GeneralInfo = generalInfo
+
+					// Profile
+					detail := findNodeByAttr(root, "class", "detail-below-header")
+					if detail != nil {
+						profile := Profile{}
+						for _, strong := range findNodesByTag(detail, atom.Strong) {
+							switch strings.TrimSpace(extractText(strong)) {
+							case "Height:":
+								profile.Height = extractText(strong.NextSibling)
+							case "Weight:":
+								profile.Weight = extractText(strong.NextSibling)
+							case "Catch Rate:":
+								profile.CatchRate = extractText(strong.NextSibling)
+							case "Gender Ratio:":
+								profile.GenderRatio = extractText(strong.NextSibling)
+							case "Egg Groups:":
+								profile.EggGroups = extractText(strong.NextSibling)
+							case "Hatch Steps:":
+								profile.HatchSteps = extractText(strong.NextSibling)
+							case "Abilities:":
+								profile.Abilities = extractText(strong.NextSibling)
+							case "EVs:":
+								profile.EVs = extractText(strong.NextSibling)
+							}
+						}
+						pokemon.Profile = profile
 					}
 				}
+			}
+			var multFunc func(*html.Node)
+			multFunc = func(n *html.Node) {
+				if n.Type == html.ElementNode && n.Data == "div" && extractAttribute(n, "class") == "when-attacked-row" {
+					var pokeType, pokeMult string
+					for c := n.FirstChild; c != nil; c = c.NextSibling {
+						if c.Type == html.ElementNode && c.Data == "span" {
+							if class := extractAttribute(c, "class"); class == "monster-type" {
+								pokeType = strings.TrimSpace(c.FirstChild.Data)
+							} else if class == "monster-multiplier" {
+								pokeMult = strings.TrimSpace(c.FirstChild.Data)
 
-				nationalID := findNodeByAttr(detailInfobox, "class", "detail-national-id")
-				if nationalID != nil {
-					generalInfo.ID = extractText(findNodeByTag(nationalID, atom.Span))
-				}
-
-				stats := findNodeByAttr(detailInfobox, "class", "detail-stats")
-				if stats != nil {
-					for _, statRow := range findNodesByTag(stats, atom.Div) {
-						if extractAttribute(statRow, "class") == "detail-stats-row" {
-							stat := Stat{}
-							stat.StatName = extractText(statRow.FirstChild)
-							stat.StatNum = extractText(statRow.LastChild)
-							generalInfo.Stat = append(generalInfo.Stat, stat)
+								if pokeType != "" && pokeMult != "" {
+									Multiplier := Multiplier{
+										DamageType: pokeType,
+										DamageMult: pokeMult,
+									}
+									pokemon.DamageMultiplier = append(pokemon.DamageMultiplier, Multiplier)
+								}
+							}
 						}
 					}
 				}
 
-				species := findNodeByAttr(root, "class", "monster-species")
-				if species != nil {
-					generalInfo.Species = extractText(species)
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					multFunc(c)
 				}
+			}
+			multFunc(root)
 
-				desc := findNodeByAttr(root, "class", "monster-description")
-				if desc != nil {
-					generalInfo.Desc = extractText(desc)
-				}
-				pokemon.GeneralInfo = generalInfo
-
-				// Profile
-				detail := findNodeByAttr(root, "class", "detail-below-header")
-				if detail != nil {
-					profile := Profile{}
-					for _, strong := range findNodesByTag(detail, atom.Strong) {
-						switch strings.TrimSpace(extractText(strong)) {
-						case "Height:":
-							profile.Height = extractText(strong.NextSibling)
-						case "Weight:":
-							profile.Weight = extractText(strong.NextSibling)
-						case "Catch Rate:":
-							profile.CatchRate = extractText(strong.NextSibling)
-						case "Gender Ratio:":
-							profile.GenderRatio = extractText(strong.NextSibling)
-						case "Egg Groups:":
-							profile.EggGroups = extractText(strong.NextSibling)
-						case "Hatch Steps:":
-							profile.HatchSteps = extractText(strong.NextSibling)
-						case "Abilities:":
-							profile.Abilities = extractText(strong.NextSibling)
-						case "EVs:":
-							profile.EVs = extractText(strong.NextSibling)
+			var evoFunc func(*html.Node)
+			evoFunc = func(n *html.Node) {
+				if n.Type == html.ElementNode && n.Data == "div" && extractAttribute(n, "class") == "evolution-row" {
+					for c := n.FirstChild; c != nil; c = c.NextSibling {
+						if c.Type == html.ElementNode && c.Data == "div" && extractAttribute(c, "class") == "evolution-label" {
+							evolutionInfo := strings.TrimSpace(c.FirstChild.FirstChild.Data)
+							pokemon.Evolution = append(pokemon.Evolution, evolutionInfo)
 						}
 					}
-					pokemon.Profile = profile
 				}
 
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					evoFunc(c)
+				}
+			}
+			evoFunc(root)
+
+			var currentMove *Moves
+
+			var parseNode func(*html.Node)
+			parseNode = func(n *html.Node) {
+				if n.Type == html.ElementNode {
+					if n.Data == "div" && len(n.Attr) > 0 && n.Attr[0].Key == "class" {
+						switch n.Attr[0].Val {
+						case "moves-inner-row":
+							currentMove = &Moves{}
+							pokemon.Move = append(pokemon.Move, *currentMove)
+						case "moves-row-stats":
+							for c := n.FirstChild; c != nil; c = c.NextSibling {
+								if c.Type == html.ElementNode && c.Data == "strong" {
+									switch strings.TrimSpace(c.FirstChild.Data) {
+									case "Power:":
+										currentMove.Power = strings.TrimSpace(c.LastChild.Data)
+									case "Acc:":
+										currentMove.Acc = strings.TrimSpace(c.LastChild.Data)
+									case "PP:":
+										currentMove.PP = strings.TrimSpace(c.LastChild.Data)
+									}
+								}
+							}
+						case "move-description":
+							currentMove.MoveDesc = strings.TrimSpace(n.FirstChild.Data)
+						}
+					}
+				}
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					parseNode(c)
+				}
+			}
+
+			parseNode(root)
+
+			// Print parsed moves
+			for _, move := range pokemon.Move {
+				fmt.Printf("MoveName: %s, Power: %s, Acc: %s, PP: %s, Description: %s\n", move.MoveName, move.Power, move.Acc, move.PP, move.MoveDesc)
 			}
 
 			Pokedex = append(Pokedex, pokemon)
 		}
+
 	}
 
 	// Fetch and parse additional data from Bulbapedia
@@ -269,15 +344,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	XP := findNodeByClass(bulbapediaRoot, "sortable roundy jquery-tablesorter")
-	if XP != nil {
-		tbody := findNodeByTag(XP, atom.Tbody)
-		if tbody != nil {
-			for i, row := range findNodesByTag(tbody, atom.Tr) {
-				if i >= limit {
-					break
-				}
-				cols := findNodesByTag(row, atom.Td)
+	table := findNodeByAttr(bulbapediaRoot, "class", "jquery-tablesorter")
+
+	tbody := findNodeByTag(table, atom.Tbody)
+	if tbody != nil {
+		rows := findNodesByTag(tbody, atom.Tr)
+		for i, row := range rows {
+			if i >= limit {
+				break
+			}
+			cols := findNodesByTag(row, atom.Td)
+			if len(cols) >= 4 {
 				baseXp := extractText(cols[3])
 				Pokedex[i].BaseXp = baseXp
 			}

@@ -6,7 +6,8 @@
             "ID": "#1",
             "Type": [
                 "grass",
-                "poison"
+                "poison",
+                "#1"
             ],
             "Stat": [
                 {
@@ -47,19 +48,63 @@
             "Abilities": "Chlorophyll, Overgrow",
             "EVs": "1 Sp Att"
         },
-        "DamageMultiplier": null,
-        "Evolution": null,
+        "DamageMultiplier": [
+            {
+                "DamageType": "ice",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "electric",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "ground",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fairy",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "psychic",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "water",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "fire",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fighting",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "flying",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "grass",
+                "DamageMult": "0.25x"
+            }
+        ],
+        "Evolution": [
+            "Bulbasaur evolves into Ivysaur"
+        ],
         "Move": null,
         "BaseXp": ""
     },
     {
-        "Name": "Ivysaur",
+        "Name": "Bulbasaur",
         "Image": "",
         "GeneralInfo": {
             "ID": "#1",
             "Type": [
                 "grass",
-                "poison"
+                "poison",
+                "#1"
             ],
             "Stat": [
                 {
@@ -100,19 +145,63 @@
             "Abilities": "Chlorophyll, Overgrow",
             "EVs": "1 Sp Att"
         },
-        "DamageMultiplier": null,
-        "Evolution": null,
+        "DamageMultiplier": [
+            {
+                "DamageType": "ice",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "electric",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "ground",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fairy",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "psychic",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "water",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "fire",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fighting",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "flying",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "grass",
+                "DamageMult": "0.25x"
+            }
+        ],
+        "Evolution": [
+            "Bulbasaur evolves into Ivysaur"
+        ],
         "Move": null,
         "BaseXp": ""
     },
     {
-        "Name": "Venusaur",
+        "Name": "Bulbasaur",
         "Image": "",
         "GeneralInfo": {
             "ID": "#1",
             "Type": [
                 "grass",
-                "poison"
+                "poison",
+                "#1"
             ],
             "Stat": [
                 {
@@ -153,19 +242,63 @@
             "Abilities": "Chlorophyll, Overgrow",
             "EVs": "1 Sp Att"
         },
-        "DamageMultiplier": null,
-        "Evolution": null,
+        "DamageMultiplier": [
+            {
+                "DamageType": "ice",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "electric",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "ground",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fairy",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "psychic",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "water",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "fire",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fighting",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "flying",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "grass",
+                "DamageMult": "0.25x"
+            }
+        ],
+        "Evolution": [
+            "Bulbasaur evolves into Ivysaur"
+        ],
         "Move": null,
         "BaseXp": ""
     },
     {
-        "Name": "Charmander",
+        "Name": "Bulbasaur",
         "Image": "",
         "GeneralInfo": {
             "ID": "#1",
             "Type": [
                 "grass",
-                "poison"
+                "poison",
+                "#1"
             ],
             "Stat": [
                 {
@@ -206,19 +339,63 @@
             "Abilities": "Chlorophyll, Overgrow",
             "EVs": "1 Sp Att"
         },
-        "DamageMultiplier": null,
-        "Evolution": null,
+        "DamageMultiplier": [
+            {
+                "DamageType": "ice",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "electric",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "ground",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fairy",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "psychic",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "water",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "fire",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fighting",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "flying",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "grass",
+                "DamageMult": "0.25x"
+            }
+        ],
+        "Evolution": [
+            "Bulbasaur evolves into Ivysaur"
+        ],
         "Move": null,
         "BaseXp": ""
     },
     {
-        "Name": "Charmeleon",
+        "Name": "Bulbasaur",
         "Image": "",
         "GeneralInfo": {
             "ID": "#1",
             "Type": [
                 "grass",
-                "poison"
+                "poison",
+                "#1"
             ],
             "Stat": [
                 {
@@ -259,8 +436,51 @@
             "Abilities": "Chlorophyll, Overgrow",
             "EVs": "1 Sp Att"
         },
-        "DamageMultiplier": null,
-        "Evolution": null,
+        "DamageMultiplier": [
+            {
+                "DamageType": "ice",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "electric",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "ground",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fairy",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "psychic",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "water",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "fire",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "fighting",
+                "DamageMult": "0.5x"
+            },
+            {
+                "DamageType": "flying",
+                "DamageMult": "2x"
+            },
+            {
+                "DamageType": "grass",
+                "DamageMult": "0.25x"
+            }
+        ],
+        "Evolution": [
+            "Bulbasaur evolves into Ivysaur"
+        ],
         "Move": null,
         "BaseXp": ""
     }
