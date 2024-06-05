@@ -27,14 +27,13 @@ type MonsterStats struct {
 	Rev string `json:"_rev"`
 }
 
-// InputData represents the structure of the input text file.
 type InputData struct {
 	Docs []MonsterStats `json:"docs"`
 	Seq  int            `json:"seq"`
 }
 
 func Crawl() {
-	var allStats []MonsterStats // Initialize a slice to hold all supplementals
+	var allStats []MonsterStats
 
 	for i := 1; i <= 3; i++ {
 		url := fmt.Sprintf("https://pokedex.org/assets/monsters-supplemental-%d.txt", i)
@@ -73,12 +72,10 @@ func Crawl() {
 				continue
 			}
 
-			// Append each supplemental to the allStats slice
 			allStats = append(allStats, inputData.Docs...)
 		}
 	}
 
-	// Marshal allStats to JSON and write to a single file
 	allStatsJSON, err := json.MarshalIndent(allStats, "", "  ")
 	if err != nil {
 		log.Fatalf("Failed to marshal all supplementals to JSON: %s", err)
@@ -90,5 +87,5 @@ func Crawl() {
 		log.Fatalf("Failed to write all supplementals to file: %s\nError: %s", filename, err)
 	}
 
-	fmt.Println("All supplementals have been saved to a single JSON file.")
+	fmt.Println("All info have been saved to stats.json.")
 }

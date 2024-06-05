@@ -63,13 +63,10 @@ func Crawl() {
 				log.Printf("Failed to unmarshal part: %s\nError: %s", part, err)
 				continue
 			}
-
-			// Append each move to the MonsterMoves slice
 			MonsterMoves = append(MonsterMoves, inputData.Docs...)
 		}
 	}
 
-	// Marshal MonsterMoves to JSON and write to a single file
 	MonsterMovesJSON, err := json.MarshalIndent(MonsterMoves, "", "  ")
 	if err != nil {
 		log.Fatalf("Failed to marshal all moves to JSON: %s", err)
@@ -81,5 +78,5 @@ func Crawl() {
 		log.Fatalf("Failed to write all moves to file: %s\nError: %s", filename, err)
 	}
 
-	fmt.Println("All moves have been saved to a single JSON file.")
+	fmt.Println("All info have been saved to monsterMoves.json.")
 }

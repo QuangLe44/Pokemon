@@ -81,5 +81,5 @@ func Crawl() {
 		log.Fatalf("Failed to write all moves to file: %s\nError: %s", filename, err)
 	}
 
-	fmt.Println("All moves have been saved to a single JSON file.")
+	fmt.Println("All info have been saved to moves.json.")
 }

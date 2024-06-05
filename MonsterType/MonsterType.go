@@ -9,22 +9,18 @@ import (
 	"strings"
 )
 
-type When struct {
-	/*
-		"multiplier":0.5,"name":"fire"
-	*/
+type mult struct {
 	Multiplier interface{} `json:"multiplier"`
 	Name       string      `json:"name"`
 }
 
 type MonsterType struct {
-	WhenDefending []When `json:"whenDefending"`
-	WhenAttacking []When `json:"whenAttacking"`
+	WhenDefending []mult `json:"whenDefending"`
+	WhenAttacking []mult `json:"whenAttacking"`
 	ID            string `json:"_id"`
 	Rev           string `json:"_rev"`
 }
 
-// InputData represents the structure of the input text file.
 type InputData struct {
 	Docs []MonsterType `json:"docs"`
 	Seq  int           `json:"seq"`
@@ -84,5 +80,5 @@ func Crawl() {
 		log.Fatalf("Failed to write all MonsterType to file: %s\nError: %s", filename, err)
 	}
 
-	fmt.Println("All MonsterType have been saved to a single JSON file.")
+	fmt.Println("All info have been saved to MonsterType.json.")
 }

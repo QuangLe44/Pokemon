@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type Up struct {
+type monster struct {
 	NationalId int    `json:"nationalId"`
 	Name       string `json:"name"`
 	Method     string `json:"method"`
@@ -17,10 +17,10 @@ type Up struct {
 }
 
 type Evolution struct {
-	From []Up   `json:"from"`
-	To   []Up   `json:"to"`
-	ID   string `json:"_id"`
-	Rev  string `json:"_rev"`
+	From []monster `json:"from"`
+	To   []monster `json:"to"`
+	ID   string    `json:"_id"`
+	Rev  string    `json:"_rev"`
 }
 
 type InputData struct {
@@ -81,5 +81,5 @@ func Crawl() {
 		log.Fatalf("Failed to write all evolutions to file: %s\nError: %s", filename, err)
 	}
 
-	fmt.Println("All evolutions have been saved to a single JSON file.")
+	fmt.Println("All info have been saved to evolution.json.")
 }
