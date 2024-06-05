@@ -16,6 +16,6 @@ func main() {
 	MonsterMoves.Crawl()
 	Stats.Crawl()
 	evolution.Crawl()
-	MonsterType.Crawl()
 	description.Crawl()
+	MonsterType.Crawl()
 }

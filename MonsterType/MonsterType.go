@@ -3,81 +3,68 @@ package MonsterType
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
+	"os"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
-type mult struct {
-	Multiplier interface{} `json:"multiplier"`
-	Name       string      `json:"name"`
+type PokemonInfo struct {
+	ID           int           `json:"id"`
+	MonsterTypes []MonsterType `json:"monster_types"`
 }
 
 type MonsterType struct {
-	WhenDefending []mult `json:"whenDefending"`
-	WhenAttacking []mult `json:"whenAttacking"`
-	ID            string `json:"_id"`
-	Rev           string `json:"_rev"`
-}
-
-type InputData struct {
-	Docs []MonsterType `json:"docs"`
-	Seq  int           `json:"seq"`
+	Type       string `json:"type"`
+	Multiplier string `json:"multiplier"`
 }
 
 func Crawl() {
-	url := "https://pokedex.org/assets/types.txt"
+	pokemonInfos := make([]PokemonInfo, 0)
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Fatalf("Failed to create request: %s", err)
-	}
-
-	req.Header.Set("Referer", "https://pokedex.org/js/worker.js")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalf("Failed to send request: %s", err)
-	}
-	defer resp.Body.Close()
-
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Failed to read response body: %s", err)
-	}
-
-	parts := strings.Split(string(content), "\n")
-
-	var allMonsterType []MonsterType
-
-	for _, part := range parts {
-		if strings.TrimSpace(part) == "" {
-			continue
-		}
-
-		var inputData InputData
-		err := json.Unmarshal([]byte(part), &inputData)
+	for i := 1; i <= 649; i++ {
+		url := fmt.Sprintf("https://pokedex.org/#/pokemon/%d", i)
+		doc, err := goquery.NewDocument(url)
 		if err != nil {
-			log.Printf("Failed to unmarshal part: %s\nError: %s", part, err)
-			continue
+			log.Fatalf("Error fetching URL %s: %v", url, err)
 		}
 
-		allMonsterType = append(allMonsterType, inputData.Docs...)
+		monsterTypes := make([]MonsterType, 0)
+
+		doc.Find(".when-attacked-row").Each(func(i int, s *goquery.Selection) {
+			s.Find(".monster-type").Each(func(i int, s *goquery.Selection) {
+				mType := strings.TrimSpace(s.Text())
+				multiplier := strings.TrimSpace(s.Next().Text())
+				monsterTypes = append(monsterTypes, MonsterType{
+					Type:       mType,
+					Multiplier: multiplier,
+				})
+			})
+		})
+
+		pokemonInfo := PokemonInfo{
+			ID:           i,
+			MonsterTypes: monsterTypes,
+		}
+
+		pokemonInfos = append(pokemonInfos, pokemonInfo)
 	}
 
-	allMonsterTypeJSON, err := json.MarshalIndent(allMonsterType, "", "  ")
+	jsonData, err := json.MarshalIndent(pokemonInfos, "", "")
 	if err != nil {
-		log.Fatalf("Failed to marshal all MonsterType to JSON: %s", err)
+		log.Fatalf("Error marshaling JSON: %v", err)
 	}
 
-	filename := "data/MonsterType.json"
-
-	err = ioutil.WriteFile(filename, allMonsterTypeJSON, 0644)
+	file, err := os.Create("data/MonsterType.json")
 	if err != nil {
-		log.Fatalf("Failed to write all MonsterType to file: %s\nError: %s", filename, err)
+		log.Fatalf("Error creating file: %v", err)
+	}
+	defer file.Close()
+
+	_, err = file.Write(jsonData)
+	if err != nil {
+		log.Fatalf("Error writing to file: %v", err)
 	}
 
 	fmt.Println("All info have been saved to MonsterType.json.")
