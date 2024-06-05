@@ -64,6 +64,16 @@ type EvolutionDetail struct {
 	Level      int    `json:"level"`
 }
 
+type MonsterType struct {
+	Type       string `json:"type"`
+	Multiplier string `json:"multiplier"`
+}
+
+type Mult struct {
+	ID           int           `json:"id"`
+	MonsterTypes []MonsterType `json:"monster_types"`
+}
+
 func (e *Evolution) UnmarshalJSON(data []byte) error {
 	type Alias Evolution
 	aux := &struct {
@@ -201,6 +211,33 @@ func loadEvo(filename string) (map[int]Evolution, error) {
 	return evoMap, nil
 }
 
+func loadType(filename string) (map[int]Mult, error) {
+	var PokeType []Mult
+	typeMap := make(map[int]Mult)
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &PokeType)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, info := range PokeType {
+		typeMap[info.ID] = info
+	}
+
+	return typeMap, nil
+}
+
 func findPokemonByName(pokemons []Pokemon, name string) *Pokemon {
 	for _, pokemon := range pokemons {
 		if strings.ToLower(pokemon.Name) == strings.ToLower(name) {
@@ -210,7 +247,7 @@ func findPokemonByName(pokemons []Pokemon, name string) *Pokemon {
 	return nil
 }
 
-func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolution *Evolution) {
+func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolution *Evolution, mult *Mult) {
 	fmt.Printf("Name: %s\n", pokemon.Name)
 	fmt.Printf("National ID: %d\n", pokemon.NationalID)
 	fmt.Printf("Height: %s\n", pokemon.Height)
@@ -277,6 +314,13 @@ func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Descriptio
 			}
 		}
 	}
+
+	if mult != nil {
+		fmt.Printf("\nWhen attacked:\n")
+		for _, mt := range mult.MonsterTypes {
+			fmt.Printf("  - Type: %s, Multiplier: %s\n", mt.Type, mt.Multiplier)
+		}
+	}
 }
 
 func main() {
@@ -304,6 +348,12 @@ func main() {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
+	typeFile := "data/MonsterType.json"
+	mult, err := loadType(typeFile)
+	if err != nil {
+		log.Fatalf("Failed to load additional information: %s", err)
+	}
+
 	var name string
 	fmt.Print("Enter Pokemon name: ")
 	fmt.Scanln(&name)
@@ -317,6 +367,7 @@ func main() {
 	info := additionalInfo[pokemon.NationalID]
 	desc := description[pokemon.NationalID]
 	evolution := evo[pokemon.NationalID]
+	multiplier := mult[pokemon.NationalID]
 
-	displayPokemonInfo(pokemon, &info, &desc, &evolution)
+	displayPokemonInfo(pokemon, &info, &desc, &evolution, &multiplier)
 }
