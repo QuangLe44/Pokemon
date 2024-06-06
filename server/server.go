@@ -74,36 +74,26 @@ type Mult struct {
 	MonsterTypes []MonsterType `json:"monster_types"`
 }
 
-func (e *Evolution) UnmarshalJSON(data []byte) error {
-	type Alias Evolution
-	aux := &struct {
-		From json.RawMessage `json:"from"`
-		To   json.RawMessage `json:"to"`
-		*Alias
-	}{
-		Alias: (*Alias)(e),
-	}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
+type Move struct {
+	LearnType string `json:"learn_type"`
+	Level     int    `json:"level"`
+	ID        int    `json:"id"`
+}
 
-	if aux.From != nil {
-		if err := json.Unmarshal(aux.From, &e.From); err != nil {
-			return err
-		}
-	} else {
-		e.From = []EvolutionDetail{}
-	}
+type MonsterMoves struct {
+	Moves []Move `json:"moves"`
+	ID    string `json:"_id"`
+}
 
-	if aux.To != nil {
-		if err := json.Unmarshal(aux.To, &e.To); err != nil {
-			return err
-		}
-	} else {
-		e.To = []EvolutionDetail{}
-	}
-
-	return nil
+type MoveInfo struct {
+	TypeName    string      `json:"type_name"`
+	Identifier  string      `json:"identifier"`
+	Power       interface{} `json:"power"`
+	PP          interface{} `json:"pp"`
+	Accuracy    interface{} `json:"accuracy"`
+	Description string      `json:"description"`
+	Name        string      `json:"name"`
+	ID          string      `json:"_id"`
 }
 
 func loadPokemonData(filename string) ([]Pokemon, error) {
@@ -238,6 +228,62 @@ func loadType(filename string) (map[int]Mult, error) {
 	return typeMap, nil
 }
 
+func loadMonsterMove(filename string) (map[int]MonsterMoves, error) {
+	var moves []MonsterMoves
+	moveMap := make(map[int]MonsterMoves)
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &moves)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, info := range moves {
+		id, _ := strconv.Atoi(info.ID)
+		moveMap[id] = info
+	}
+
+	return moveMap, nil
+}
+
+func loadMoveInfo(filename string) (map[int]MoveInfo, error) {
+	var moveInfo []MoveInfo
+	moveInfoMap := make(map[int]MoveInfo)
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &moveInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, move := range moveInfo {
+		id, _ := strconv.Atoi(move.ID)
+		moveInfoMap[id] = move
+	}
+
+	return moveInfoMap, nil
+}
+
 func findPokemonByName(pokemons []Pokemon, name string) *Pokemon {
 	for _, pokemon := range pokemons {
 		if strings.ToLower(pokemon.Name) == strings.ToLower(name) {
@@ -247,7 +293,7 @@ func findPokemonByName(pokemons []Pokemon, name string) *Pokemon {
 	return nil
 }
 
-func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolution *Evolution, mult *Mult) {
+func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolution *Evolution, mult *Mult, monstermove *MonsterMoves, moveInfo map[int]MoveInfo) {
 	fmt.Printf("Name: %s\n", pokemon.Name)
 	fmt.Printf("National ID: %d\n", pokemon.NationalID)
 	fmt.Printf("Height: %s\n", pokemon.Height)
@@ -321,6 +367,25 @@ func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Descriptio
 			fmt.Printf("  - Type: %s, Multiplier: %s\n", mt.Type, mt.Multiplier)
 		}
 	}
+
+	if monstermove != nil {
+		fmt.Printf("\nMonster moves:\n")
+		fmt.Println("Moves:")
+		for _, move := range monstermove.Moves {
+			moveInfo, exists := moveInfo[move.ID]
+			if exists {
+				fmt.Printf("  - Learn Type: %s, Level: %d\n", move.LearnType, move.Level)
+				fmt.Printf("  - Name: %s\n", moveInfo.Name)
+				fmt.Printf("  - Type: %s\n", moveInfo.TypeName)
+				fmt.Printf("  - Power: %v\n", moveInfo.Power)
+				fmt.Printf("  - PP: %v\n", moveInfo.PP)
+				fmt.Printf("  - Accuracy: %v\n", moveInfo.Accuracy)
+				fmt.Printf("  - Description: %s\n", moveInfo.Description)
+				fmt.Println()
+			}
+
+		}
+	}
 }
 
 func main() {
@@ -354,6 +419,19 @@ func main() {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
+	monsterMovesFile := "data/monsterMoves.json"
+	monsterMove, err := loadMonsterMove(monsterMovesFile)
+	if err != nil {
+		log.Fatalf("Failed to load additional information: %s", err)
+	}
+
+	moveInfoFIle := "data/moves.json"
+	moveInfo, err := loadMoveInfo(moveInfoFIle)
+	if err != nil {
+		fmt.Println("Error loading move details:", err)
+		return
+	}
+
 	var name string
 	fmt.Print("Enter Pokemon name: ")
 	fmt.Scanln(&name)
@@ -368,6 +446,7 @@ func main() {
 	desc := description[pokemon.NationalID]
 	evolution := evo[pokemon.NationalID]
 	multiplier := mult[pokemon.NationalID]
+	monstermoves := monsterMove[pokemon.NationalID]
 
-	displayPokemonInfo(pokemon, &info, &desc, &evolution, &multiplier)
+	displayPokemonInfo(pokemon, &info, &desc, &evolution, &multiplier, &monstermoves, moveInfo)
 }
