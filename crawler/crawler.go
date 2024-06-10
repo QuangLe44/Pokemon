@@ -7,6 +7,7 @@ import (
 	"Pokemon/Stats"
 	"Pokemon/description"
 	"Pokemon/evolution"
+	"Pokemon/exp"
 	"Pokemon/move"
 )
 
@@ -18,4 +19,6 @@ func main() {
 	evolution.Crawl()
 	description.Crawl()
 	MonsterType.Crawl()
+	exp.Crawl()
+	exp.Remove()
 }
