@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -388,79 +387,83 @@ func displayPokemonInfo(pokemon *Pokemon, info *AdditionalInfo, desc *Descriptio
 	}
 }
 
-func main() {
-	pokemonFile := "../data/baseInfo.json"
-	pokemons, err := loadPokemonData(pokemonFile)
-	if err != nil {
-		log.Fatalf("Failed to load Pokemon data: %s", err)
-	}
+// func main() {
+// 	pokemonFile := "../data/baseInfo.json"
+// 	pokemons, err := loadPokemonData(pokemonFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load Pokemon data: %s", err)
+// 	}
 
-	additionalInfoFile := "../data/stats.json"
-	additionalInfo, err := loadAdditionalInfo(additionalInfoFile)
-	if err != nil {
-		log.Fatalf("Failed to load additional information: %s", err)
-	}
+// 	additionalInfoFile := "../data/stats.json"
+// 	additionalInfo, err := loadAdditionalInfo(additionalInfoFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load additional information: %s", err)
+// 	}
 
-	descriptionFile := "../data/MonsterDescription.json"
-	description, err := loadDescription(descriptionFile)
-	if err != nil {
-		log.Fatalf("Failed to load additional information: %s", err)
-	}
+// 	descriptionFile := "../data/MonsterDescription.json"
+// 	description, err := loadDescription(descriptionFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load additional information: %s", err)
+// 	}
 
-	evoFile := "../data/evolution.json"
-	evo, err := loadEvo(evoFile)
-	if err != nil {
-		log.Fatalf("Failed to load additional information: %s", err)
-	}
+// 	evoFile := "../data/evolution.json"
+// 	evo, err := loadEvo(evoFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load additional information: %s", err)
+// 	}
 
-	typeFile := "../data/MonsterType.json"
-	mult, err := loadType(typeFile)
-	if err != nil {
-		log.Fatalf("Failed to load additional information: %s", err)
-	}
+// 	typeFile := "../data/MonsterType.json"
+// 	mult, err := loadType(typeFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load additional information: %s", err)
+// 	}
 
-	monsterMovesFile := "../data/monsterMoves.json"
-	monsterMove, err := loadMonsterMove(monsterMovesFile)
-	if err != nil {
-		log.Fatalf("Failed to load additional information: %s", err)
-	}
+// 	monsterMovesFile := "../data/monsterMoves.json"
+// 	monsterMove, err := loadMonsterMove(monsterMovesFile)
+// 	if err != nil {
+// 		log.Fatalf("Failed to load additional information: %s", err)
+// 	}
 
-	moveInfoFIle := "../data/moves.json"
-	moveInfo, err := loadMoveInfo(moveInfoFIle)
-	if err != nil {
-		fmt.Println("Error loading move details:", err)
-		return
-	}
+// 	moveInfoFIle := "../data/moves.json"
+// 	moveInfo, err := loadMoveInfo(moveInfoFIle)
+// 	if err != nil {
+// 		fmt.Println("Error loading move details:", err)
+// 		return
+// 	}
 
-	var name string
-	fmt.Print("Enter Pokemon name: ")
-	fmt.Scanln(&name)
+// 	var name string
+// 	fmt.Print("Enter Pokemon name: ")
+// 	fmt.Scanln(&name)
 
-	pokemon := findPokemonByName(pokemons, name)
-	if pokemon == nil {
-		fmt.Printf("Pokemon with name '%s' not found.\n", name)
-		return
-	}
+// 	pokemon := findPokemonByName(pokemons, name)
+// 	if pokemon == nil {
+// 		fmt.Printf("Pokemon with name '%s' not found.\n", name)
+// 		return
+// 	}
 
-	info := additionalInfo[pokemon.NationalID]
-	desc := description[pokemon.NationalID]
-	evolution := evo[pokemon.NationalID]
-	multiplier := mult[pokemon.NationalID]
-	monstermoves := monsterMove[pokemon.NationalID]
+// 	info := additionalInfo[pokemon.NationalID]
+// 	desc := description[pokemon.NationalID]
+// 	evolution := evo[pokemon.NationalID]
+// 	multiplier := mult[pokemon.NationalID]
+// 	monstermoves := monsterMove[pokemon.NationalID]
 
-	displayPokemonInfo(pokemon, &info, &desc, &evolution, &multiplier, &monstermoves, moveInfo)
-	// Start server
-	/*s, err := newServer(":8080")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	s.Start()
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
+// 	displayPokemonInfo(pokemon, &info, &desc, &evolution, &multiplier, &monstermoves, moveInfo)
+// 	// Start server
+// // 	pokedex := make([]*Pokemon, 100)
+// // 	for i := range pokedex {
+// // 		pokedex[i] = &Pokemon{id: i}
+// // 	}
+// // 	s, err := newServer(":8080", 1000, pokedex)
+// // 	if err != nil {
+// // 		fmt.Println(err)
+// // 		os.Exit(1)
+// // 	}
+// // 	s.Start()
+// // 	sigChan := make(chan os.Signal, 1)
+// // 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+// // 	<-sigChan
 
-	fmt.Println("Shutting down server...")
-	s.Stop()
-	fmt.Println("Server stopped.")*/
-}
+// // 	fmt.Println("Shutting down server...")
+// // 	s.Stop()
+// // 	fmt.Println("Server stopped.")
+// // }
