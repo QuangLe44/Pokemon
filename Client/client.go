@@ -15,57 +15,55 @@ func main() {
 		fmt.Println("Error connecting:", err.Error())
 		return
 	}
+	reader := bufio.NewReader(os.Stdin)
 	defer conn.Close()
 
-	reader := bufio.NewReader(conn)
-	writer := bufio.NewWriter(conn)
-
-	// Set player name
 	fmt.Print("Enter your name: ")
-	name, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	name = name[:len(name)-1] // Remove newline character
-	writer.WriteString(name + "\n")
-	writer.Flush()
+	name, _ := reader.ReadString('\n')
+	name = strings.TrimSpace(name) // Remove newline character
+	conn.Write([]byte("Player name: " + name))
 
-	// Set player's active Pokemon
-	fmt.Println("Choose your active Pokemon:")
-	fmt.Println("1. Pikachu")
-	fmt.Println("2. Charmander")
-	fmt.Println("3. Squirtle")
-	fmt.Print("Enter the number of your choice: ")
-	choiceInput, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	choiceInput = strings.TrimSpace(choiceInput)
-	choice, err := strconv.Atoi(choiceInput)
-	if err != nil || choice < 1 || choice > 3 {
-		fmt.Println("Invalid choice. Please choose a number between 1 and 3.")
-		return
-	}
-	fmt.Println("Sending choice:", choiceInput)
-
-	// Send the selected Pokémon choice to the server
-	writer.WriteString(choiceInput + "\n")
-	writer.Flush()
-
-	fmt.Println("Sent choice to server.")
-
-	// Send ready signal to server
-	writer.WriteString("ready\n")
-	writer.Flush()
-
-	fmt.Println("Sent ready signal to server.")
-
-	// Wait for server messages
+	go func() {
+		for {
+			buffer := make([]byte, 1024)
+			_, err := conn.Read(buffer)
+			if err != nil {
+				fmt.Println("Error reading from server:", err.Error())
+				os.Exit(1)
+			}
+			message := string(buffer)
+			fmt.Println(message)
+		}
+	}()
+	fmt.Print("Enter 'ready' when you are ready: ")
+	var clientChoice []string
 	for {
 		message, _ := reader.ReadString('\n')
-		fmt.Print(message)
+		switch strings.TrimSpace(message) {
+		case "ready":
+			pokemonList := strings.Join(clientChoice, ",")
+			conn.Write([]byte("Player choice: " + pokemonList))
+			fmt.Println("You are ready")
+			conn.Write([]byte("ready"))
 
-		if message == "Game over! You win!\n" {
-			break
-		}
-
-		// Check if it's the player's turn
-		if strings.HasPrefix(message, name) {
-			fmt.Println("It's your turn.")
+		default:
+			if isInteger(message) {
+				fmt.Println(len(clientChoice))
+				if len(clientChoice) < 3 {
+					clientChoice = append(clientChoice, strings.TrimSpace(message))
+				} else {
+					fmt.Println("You have chosen all pokemons. Please enter 'ready'")
+				}
+				fmt.Println(message)
+			} else {
+				fmt.Println(message)
+				message = strings.TrimSpace(message)
+				conn.Write([]byte(message))
+			}
 		}
 	}
+}
+func isInteger(s string) bool {
+	_, err := strconv.Atoi(strings.TrimSpace(s))
+	return err == nil
 }

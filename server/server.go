@@ -1,30 +1,19 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
 
-type Pokemon struct {
-	Name       string
-	Speed      int
-	Attack     int
-	Defense    int
-	SpecialAtk int
-	SpecialDef int
-	Type       string
-	CurrentHP  int
-	TotalExp   int
-	Elemental  map[string]int // Elemental damage multipliers
-}
-
 type Player struct {
-	Name     string
-	Pokemons []*Pokemon
-	Active   *Pokemon
+	Name     string `json:"name"`
+	Pokemons []int  `json:"pokemons"`
+	Active   []int
 	Ready    bool
 }
 
@@ -35,8 +24,9 @@ type Battle struct {
 }
 
 var (
-	players []*Player
-	mutex   sync.Mutex
+	players     []*Player
+	pokemonList []Pokemon
+	mu          sync.Mutex
 )
 
 func main() {
@@ -46,7 +36,6 @@ func main() {
 		return
 	}
 	defer ln.Close()
-
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -55,117 +44,112 @@ func main() {
 		}
 
 		fmt.Println("Accepted new connection.")
-
 		go handleClient(conn)
 	}
 }
 
 func handleClient(conn net.Conn) {
 	defer conn.Close()
-
-	reader := bufio.NewReader(conn)
-	writer := bufio.NewWriter(conn)
-
 	player := &Player{}
-	player.Name, _ = reader.ReadString('\n')
-	player.Name = strings.TrimSpace(player.Name)
-
-	fmt.Println("Received player name:", player.Name)
-
-	// Simulate selecting pokemons
-	player.Pokemons = []*Pokemon{
-		&Pokemon{Name: "Pikachu", Speed: 10, Attack: 20, Defense: 15, SpecialAtk: 25, SpecialDef: 20, Type: "Electric", CurrentHP: 100, TotalExp: 0},
-		&Pokemon{Name: "Charmander", Speed: 8, Attack: 22, Defense: 18, SpecialAtk: 24, SpecialDef: 16, Type: "Fire", CurrentHP: 100, TotalExp: 0},
-		&Pokemon{Name: "Squirtle", Speed: 7, Attack: 18, Defense: 20, SpecialAtk: 22, SpecialDef: 18, Type: "Water", CurrentHP: 100, TotalExp: 0},
-	}
-
-	mutex.Lock()
 	players = append(players, player)
-	mutex.Unlock()
-
-	fmt.Println("Player added to players list.")
-
 	for {
-		message, err := reader.ReadString('\n')
+		buffer := make([]byte, 1024)
+		n, err := conn.Read(buffer)
 		if err != nil {
-			fmt.Println("Error reading message from client:", err)
+			fmt.Println(err)
 			return
 		}
+		message := string(buffer[:n])
+		if strings.HasPrefix(message, "Player name:") {
+			player.Name = strings.TrimSpace(message[len("Player name: "):])
+			fmt.Println("Player name is: " + player.Name)
+			fmt.Println("Received player name:", player.Name)
+			playerData, err := os.ReadFile("player.json")
+			if err != nil {
+				fmt.Println("Error reading player data file: ", err)
+				os.Exit(1)
+			}
+			err = json.Unmarshal(playerData, &players)
+			if err != nil {
+				fmt.Println("Error unmarshaling player data:", err)
+				return
+			}
+			var foundPlayer *Player
+			for _, p := range players {
+				if p.Name == player.Name {
+					foundPlayer = p
+					break
+				}
+			}
+			if foundPlayer == nil {
+				fmt.Println("Player not found in player data file:", player.Name)
+				return
+			}
+			player.Pokemons = foundPlayer.Pokemons
 
-		// Handle the message
-		// For example, you can process the message and take actions based on its content
-		fmt.Println("Received message from", player.Name+":", message)
+			pokemonList, err := loadPokemonData("../data/baseInfo.json")
+			if err != nil {
+				fmt.Println("Error read pokemon data:", err)
+			}
+			pokemonMap := make(map[string]Pokemon)
+			for _, pokemon := range pokemonList {
+				pokemonMap[pokemon.ID] = pokemon
+			}
 
-		// Send response back to the client if needed
-		// For example, you can send an acknowledgment back to the client
-		response := "Received message: " + message
-		writer.WriteString(response)
-		writer.Flush()
+			for _, pokemonID := range player.Pokemons {
+				idStr := strconv.Itoa(pokemonID)
+				if pokemon, found := pokemonMap[idStr]; found {
+					fmt.Printf("  - %s\n", pokemon.Name)
+				} else {
+					fmt.Printf("  - Unknown Pokemon ID: %d\n", pokemonID)
+				}
+			}
+			pokemonListMessage := "\nChoose your pokemons:\n"
+			index := 0
+			for _, pokemonID := range player.Pokemons {
+				idStr := strconv.Itoa(pokemonID)
+				if pokemon, found := pokemonMap[idStr]; found {
+					index++
+					pokemonListMessage += fmt.Sprintf("%d. %s\n", index, pokemon.Name)
+				} else {
+					pokemonListMessage += fmt.Sprintf("  - Unknown Pokemon ID: %d\n", pokemonID)
+				}
+			}
+			fmt.Print(pokemonListMessage)
+			conn.Write([]byte(pokemonListMessage))
+			fmt.Println("Sent pokemon list to client")
+		} else if strings.HasPrefix(message, "Player choice:") {
+			choicesStr := strings.TrimSpace(message[len("Player choice:"):])
+			choices := strings.Split(choicesStr, ",")
+
+			for _, choiceStr := range choices {
+				choice, err := strconv.Atoi(strings.TrimSpace(choiceStr))
+				if err != nil {
+					fmt.Println("Error converting choice to integer:", err)
+					continue
+				}
+				player.Active = append(player.Active, choice)
+			}
+			fmt.Println("Player's active choices:", player.Active)
+		} else if strings.TrimSpace(message) == "ready" {
+			player.Ready = true
+			mu.Lock()
+			allReady := true
+			for _, p := range players {
+				if !p.Ready {
+					allReady = false
+					break
+				}
+			}
+			if allReady {
+				fmt.Println("All players are ready. Starting the game...")
+				go startBattle()
+			}
+			mu.Unlock()
+
+		}
 	}
-
-	// 	fmt.Println("Both players are ready.")
-
-	// 	// Game starts
-	// 	battle := &Battle{Players: players, Turn: 0}
-
-	// 	for battle.WinnerIndex == -1 {
-	// 		player := battle.Players[battle.Turn%2]
-	// 		enemy := battle.Players[(battle.Turn+1)%2]
-
-	// 		sendMessage(player.Name+", it's your turn.\n", writer)
-	// 		sendMessage("Your active Pokemon: "+player.Active.Name+"\n", writer)
-	// 		sendMessage("Choose an action:\n1. Attack\n2. Switch Pokemon\n", writer)
-
-	// 		action, _ := reader.ReadString('\n')
-	// 		action = strings.TrimSpace(action)
-
-	// 		switch action {
-	// 		case "1":
-	// 			// Simulate attack
-	// 			sendMessage("Select an attack:\n1. Normal Attack\n2. Special Attack\n", writer)
-	// 			attackType, _ := reader.ReadString('\n')
-	// 			attackType = strings.TrimSpace(attackType)
-
-	// 			var damage int
-	// 			if attackType == "1" {
-	// 				damage = player.Active.Attack - enemy.Active.Defense
-	// 			} else if attackType == "2" {
-	// 				damage = player.Active.SpecialAtk*enemy.Active.Elemental[player.Active.Type] - enemy.Active.SpecialDef
-	// 			} else {
-	// 				sendMessage("Invalid attack type.\n", writer)
-	// 				continue
-	// 			}
-
-	// 			enemy.Active.CurrentHP -= damage
-	// 			sendMessage("Dealt "+strconv.Itoa(damage)+" damage to "+enemy.Active.Name+".\n", writer)
-
-	// 		case "2":
-	// 			// Simulate switching Pokemon
-	// 			sendMessage("Select a Pokemon to switch to:\n", writer)
-	// 			for i, pokemon := range player.Pokemons {
-	// 				sendMessage(strconv.Itoa(i+1)+". "+pokemon.Name+"\n", writer)
-	// 			}
-
-	// 			pokemonIndex, _ := reader.ReadString('\n')
-	// 			pokemonIndex = strings.TrimSpace(pokemonIndex)
-	// 			index, err := strconv.Atoi(pokemonIndex)
-	// 			if err != nil || index < 1 || index > len(player.Pokemons) {
-	// 				sendMessage("Invalid Pokemon index.\n", writer)
-	// 				continue
-	// 			}
-
-	// 			player.Active = player.Pokemons[index-1]
-	// 			sendMessage("Switched to "+player.Active.Name+".\n", writer)
-	// 		}
-
-	// 		battle.Turn++
-	// 	}
-
-	// 	winner := battle.Players[battle.WinnerIndex]
-	// 	sendMessage("Game over! "+winner.Name+" wins!\n", writer)
-	// }
-
-	// func sendMessage(message string, writer *bufio.Writer) {
-	// 	writer.WriteString(message)
-	// 	writer.Flush()
+}
+func startBattle() {
+	fmt.Println("Battle start")
 }

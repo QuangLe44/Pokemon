@@ -13,24 +13,24 @@ type ListMapObject struct {
 	Name string `json:"name"`
 }
 
-// type Pokemon struct {
-// 	Descriptions    []ListMapObject `json:"descriptions"`
-// 	Types           []ListMapObject `json:"types"`
-// 	Abilities       []ListMapObject `json:"abilities"`
-// 	Attack          int             `json:"attack"`
-// 	Defense         int             `json:"defense"`
-// 	Speed           int             `json:"speed"`
-// 	SpAtk           int             `json:"sp_atk"`
-// 	SpDef           int             `json:"sp_def"`
-// 	HP              int             `json:"hp"`
-// 	Weight          string          `json:"weight"`
-// 	Height          string          `json:"height"`
-// 	NationalID      int             `json:"national_id"`
-// 	MaleFemaleRatio string          `json:"male_female_ratio"`
-// 	CatchRate       int             `json:"catch_rate"`
-// 	ID              string          `json:"_id"`
-// 	Name            string          `json:"name"`
-// }
+type Pokemon struct {
+	Descriptions    []ListMapObject `json:"descriptions"`
+	Types           []ListMapObject `json:"types"`
+	Abilities       []ListMapObject `json:"abilities"`
+	Attack          int             `json:"attack"`
+	Defense         int             `json:"defense"`
+	Speed           int             `json:"speed"`
+	SpAtk           int             `json:"sp_atk"`
+	SpDef           int             `json:"sp_def"`
+	HP              int             `json:"hp"`
+	Weight          string          `json:"weight"`
+	Height          string          `json:"height"`
+	NationalID      int             `json:"national_id"`
+	MaleFemaleRatio string          `json:"male_female_ratio"`
+	CatchRate       int             `json:"catch_rate"`
+	ID              string          `json:"_id"`
+	Name            string          `json:"name"`
+}
 
 type AdditionalInfo struct {
 	SpecialAttackEV  int    `json:"specialAttackEV"`
