@@ -35,6 +35,16 @@ func main() {
 		fmt.Println("Error listening:", err.Error())
 		return
 	}
+	pokemonList, err := loadPokemonData("../data/baseInfo.json")
+	if err != nil {
+		fmt.Println("Error reading pokemon data:", err)
+		return
+	}
+
+	pokemonMap := make(map[string]Pokemon)
+	for _, pokemon := range pokemonList {
+		pokemonMap[pokemon.ID] = pokemon
+	}
 	defer ln.Close()
 	for {
 		conn, err := ln.Accept()
@@ -44,14 +54,17 @@ func main() {
 		}
 
 		fmt.Println("Accepted new connection.")
-		go handleClient(conn)
+		go handleClient(conn, pokemonMap)
 	}
 }
 
-func handleClient(conn net.Conn) {
+func handleClient(conn net.Conn, pokemonMap map[string]Pokemon) {
 	defer conn.Close()
 	player := &Player{}
+	mu.Lock()
 	players = append(players, player)
+	mu.Unlock()
+
 	for {
 		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
@@ -69,13 +82,14 @@ func handleClient(conn net.Conn) {
 				fmt.Println("Error reading player data file: ", err)
 				os.Exit(1)
 			}
-			err = json.Unmarshal(playerData, &players)
+			var allPlayers []*Player
+			err = json.Unmarshal(playerData, &allPlayers)
 			if err != nil {
 				fmt.Println("Error unmarshaling player data:", err)
 				return
 			}
 			var foundPlayer *Player
-			for _, p := range players {
+			for _, p := range allPlayers {
 				if p.Name == player.Name {
 					foundPlayer = p
 					break
@@ -86,16 +100,6 @@ func handleClient(conn net.Conn) {
 				return
 			}
 			player.Pokemons = foundPlayer.Pokemons
-
-			pokemonList, err := loadPokemonData("../data/baseInfo.json")
-			if err != nil {
-				fmt.Println("Error read pokemon data:", err)
-			}
-			pokemonMap := make(map[string]Pokemon)
-			for _, pokemon := range pokemonList {
-				pokemonMap[pokemon.ID] = pokemon
-			}
-
 			for _, pokemonID := range player.Pokemons {
 				idStr := strconv.Itoa(pokemonID)
 				if pokemon, found := pokemonMap[idStr]; found {
@@ -132,8 +136,8 @@ func handleClient(conn net.Conn) {
 			}
 			fmt.Println("Player's active choices:", player.Active)
 		} else if strings.TrimSpace(message) == "ready" {
-			player.Ready = true
 			mu.Lock()
+			player.Ready = true
 			allReady := true
 			for _, p := range players {
 				if !p.Ready {
@@ -143,13 +147,23 @@ func handleClient(conn net.Conn) {
 			}
 			if allReady {
 				fmt.Println("All players are ready. Starting the game...")
-				go startBattle()
+				go startBattle(pokemonMap)
 			}
 			mu.Unlock()
-
 		}
 	}
 }
-func startBattle() {
+
+func startBattle(pokemonMap map[string]Pokemon) {
+	mu.Lock()
+	defer mu.Unlock()
 	fmt.Println("Battle start")
+	for _, player := range players {
+		if len(player.Active) > 0 {
+			firstPokemonID := player.Active[0]
+			fmt.Printf("%s's first Pokémon: %s\n", player.Name, pokemonMap[strconv.Itoa(firstPokemonID)].Name)
+		} else {
+			fmt.Printf("No active Pokémon for player %s\n", player.Name)
+		}
+	}
 }

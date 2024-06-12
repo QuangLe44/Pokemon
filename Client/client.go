@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -26,12 +27,12 @@ func main() {
 	go func() {
 		for {
 			buffer := make([]byte, 1024)
-			_, err := conn.Read(buffer)
+			n, err := conn.Read(buffer)
 			if err != nil {
 				fmt.Println("Error reading from server:", err.Error())
 				os.Exit(1)
 			}
-			message := string(buffer)
+			message := string(buffer[:n])
 			fmt.Println(message)
 		}
 	}()
@@ -43,6 +44,7 @@ func main() {
 		case "ready":
 			pokemonList := strings.Join(clientChoice, ",")
 			conn.Write([]byte("Player choice: " + pokemonList))
+			time.Sleep(5 * time.Second)
 			fmt.Println("You are ready")
 			conn.Write([]byte("ready"))
 
@@ -63,6 +65,7 @@ func main() {
 		}
 	}
 }
+
 func isInteger(s string) bool {
 	_, err := strconv.Atoi(strings.TrimSpace(s))
 	return err == nil
