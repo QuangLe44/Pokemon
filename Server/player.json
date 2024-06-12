@@ -1,0 +1,13 @@
+[
+    {
+      "Username": "user1",
+      "Password": "user1",
+      "Pokemons": [1,2,3]
+    },
+    {
+      "Username": "user2",
+      "Password": "user2",
+      "Pokemons": [4,5,6]
+    }
+  ]
+  
