@@ -217,16 +217,43 @@ func processAction(currentPlayer, opponentPlayer *Player, action string) {
 		if opponentPlayer.Health[0] <= 0 {
 			currentPlayer.Conn.Write([]byte("Opponent's Pokémon fainted!\n"))
 			opponentPlayer.Conn.Write([]byte("Your Pokémon fainted!\n"))
-			// Handle Pokémon fainting (switch to next Pokémon or end battle)
-			// For simplicity, we'll end the battle here if the first Pokémon faints
-			currentPlayer.Conn.Write([]byte("You win!\n"))
-			opponentPlayer.Conn.Write([]byte("You lose!\n"))
-			currentPlayer.Conn.Close()
-			opponentPlayer.Conn.Close()
+			if !switchToNextPokemon(opponentPlayer) {
+				// End the battle if no Pokémon left to switch to
+				currentPlayer.Conn.Write([]byte("You win!\n"))
+				opponentPlayer.Conn.Write([]byte("You lose!\n"))
+				currentPlayer.Conn.Close()
+				opponentPlayer.Conn.Close()
+				return
+			}
 		}
 	case "switch":
 		// Handle Pokémon switching logic
+		if len(currentPlayer.Active) < 2 {
+			currentPlayer.Conn.Write([]byte("No other Pokémon to switch to.\n"))
+			return
+		}
+		switchPokemon(currentPlayer)
+		currentPlayer.Conn.Write([]byte("You switched Pokémon. Turn passed to opponent.\n"))
+		opponentPlayer.Conn.Write([]byte("Opponent switched Pokémon. It's your turn.\n"))
 	case "forfeit":
 		// Handle player forfeiting the match
+		currentPlayer.Conn.Write([]byte("You forfeited. You lose!\n"))
+		opponentPlayer.Conn.Write([]byte("Opponent forfeited. You win!\n"))
+		currentPlayer.Conn.Close()
+		opponentPlayer.Conn.Close()
 	}
+}
+
+func switchToNextPokemon(player *Player) bool {
+	if len(player.Active) <= 1 {
+		return false
+	}
+	player.Active = player.Active[1:]
+	player.Health = player.Health[1:]
+	return true
+}
+
+func switchPokemon(player *Player) {
+	player.Active = append(player.Active[1:], player.Active[0])
+	player.Health = append(player.Health[1:], player.Health[0])
 }
