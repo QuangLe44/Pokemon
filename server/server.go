@@ -3,17 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Player struct {
 	Name     string    `json:"name"`
 	Pokemons []Pokemon `json:"pokemons"`
 	Active   []int
+	Health   []int
 	Ready    bool
 	Turn     int
 	Conn     net.Conn
@@ -28,7 +31,6 @@ type Battle struct {
 var (
 	players []*Player
 	mu      sync.Mutex
-	wg      sync.WaitGroup
 )
 
 func main() {
@@ -64,17 +66,7 @@ func handleClient(conn net.Conn) {
 	defer conn.Close()
 	player := &Player{}
 	player.Conn = conn
-	mu.Lock()
 	players = append(players, player)
-	playerIndex := len(players) - 1
-	mu.Unlock()
-	defer func() {
-		mu.Lock()
-		defer mu.Unlock()
-		// Remove the player from the players slice when the connection is closed
-		players = append(players[:playerIndex], players[playerIndex+1:]...)
-	}()
-
 	for {
 		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
@@ -110,14 +102,7 @@ func handleClient(conn net.Conn) {
 				return
 			}
 			player.Pokemons = foundPlayer.Pokemons
-			// for _, pokemonID := range player.Pokemons {
-			// 	idStr := strconv.Itoa(pokemonID)
-			// 	if pokemon, found := pokemonMap[idStr]; found {
-			// 		fmt.Printf("  - %s\n", pokemon.Name)
-			// 	} else {
-			// 		fmt.Printf("  - Unknown Pokemon ID: %d\n", pokemonID)
-			// 	}
-			// }
+
 			pokemonListMessage := "\nChoose your pokemons:\n"
 			index := 0
 			for _, pokemon := range player.Pokemons {
@@ -131,32 +116,43 @@ func handleClient(conn net.Conn) {
 			choicesStr := strings.TrimSpace(message[len("Player choice:"):])
 			choices := strings.Split(choicesStr, ",")
 
-			for _, choiceStr := range choices {
+			for n, choiceStr := range choices {
 				choice, err := strconv.Atoi(strings.TrimSpace(choiceStr))
 				if err != nil {
 					fmt.Println("Error converting choice to integer:", err)
 					continue
 				}
 				player.Active = append(player.Active, choice)
+				for _, pokemon := range player.Pokemons {
+					pokemonID, _ := strconv.Atoi(pokemon.ID)
+					if pokemonID == player.Active[n] {
+						player.Health = append(player.Health, pokemon.HP)
+					}
+				}
 			}
 			fmt.Println("Player's active choices:", player.Active)
 		} else if strings.TrimSpace(message) == "ready" {
-			mu.Lock()
 			player.Ready = true
-			allReady := true
-			for _, p := range players {
-				if !p.Ready {
-					allReady = false
-					break
-				}
-			}
-			if allReady {
-				fmt.Println("All players are ready. Starting the game...")
-				go startBattle()
-			}
-			mu.Unlock()
+			break
 		}
 	}
+	for {
+		allReady := true
+		for _, currentPlayer := range players {
+			if !currentPlayer.Ready {
+				mu.Lock()
+				allReady = false
+				mu.Unlock()
+			}
+		}
+		if allReady {
+			startBattle()
+			break
+		} else {
+			continue
+		}
+	}
+
 }
 
 func startBattle() {
@@ -206,8 +202,6 @@ func startBattle() {
 			fmt.Printf("Opponent player %d is nil\n", 2-currentTurnIndex)
 			continue
 		}
-
-		// Send turn message to current player
 		_, err := currentPlayer.Conn.Write([]byte("Your turn! Choose an action:\nSwitch: {pokemon ID}\nAttack\nForfeit\n"))
 		if err != nil {
 			fmt.Println("Error writing to current player:", err)
@@ -222,22 +216,36 @@ func startBattle() {
 			return
 		}
 		action := strings.TrimSpace(string(buffer[:n]))
-
-		// Process action based on the chosen action
 		processAction(currentPlayer, opponentPlayer, action)
-
-		// Switch turns
 		currentTurnIndex = 2 - currentTurnIndex + 1
 	}
 }
-
 func processAction(currentPlayer, opponentPlayer *Player, action string) {
-	switch action {
-	case "Attack":
-		// Implement attack logic here
-		fmt.Printf("%s is attacking!\n", currentPlayer.Name)
-		// Example: Decrease opponent's health, check for knockouts, etc.
-	default:
-		fmt.Printf("Processing action %s for player %s\n", action, currentPlayer.Name)
+	switch strings.ToLower(action) {
+	case "attack":
+		rand.Seed(time.Now().UnixNano())
+		damage := rand.Intn(10) + 1 // Random damage between 1 and 10
+		opponentPlayer.Health[0] -= damage
+		fmt.Printf("%s attacked and dealt %d damage to %s's first Pokémon. Remaining HP: %d\n", currentPlayer.Name, damage, opponentPlayer.Name, opponentPlayer.Health[0])
+
+		// Notify players
+		currentPlayer.Conn.Write([]byte(fmt.Sprintf("You attacked and dealt %d damage. Opponent's Pokémon remaining HP: %d\n", damage, opponentPlayer.Health[0])))
+		opponentPlayer.Conn.Write([]byte(fmt.Sprintf("Opponent attacked and dealt %d damage to your Pokémon. Remaining HP: %d\n", damage, opponentPlayer.Health[0])))
+
+		// Check if opponent's Pokémon fainted
+		if opponentPlayer.Health[0] <= 0 {
+			currentPlayer.Conn.Write([]byte("Opponent's Pokémon fainted!\n"))
+			opponentPlayer.Conn.Write([]byte("Your Pokémon fainted!\n"))
+			// Handle Pokémon fainting (switch to next Pokémon or end battle)
+			// For simplicity, we'll end the battle here if the first Pokémon faints
+			currentPlayer.Conn.Write([]byte("You win!\n"))
+			opponentPlayer.Conn.Write([]byte("You lose!\n"))
+			currentPlayer.Conn.Close()
+			opponentPlayer.Conn.Close()
+		}
+	case "switch":
+		// Handle Pokémon switching logic
+	case "forfeit":
+		// Handle player forfeiting the match
 	}
 }

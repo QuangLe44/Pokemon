@@ -44,8 +44,8 @@ func main() {
 		case "ready":
 			pokemonList := strings.Join(clientChoice, ",")
 			conn.Write([]byte("Player choice: " + pokemonList))
-			time.Sleep(5 * time.Second)
-			fmt.Println("You are ready")
+			time.Sleep(3 * time.Second)
+			fmt.Println("You are ready. Please wait for the match to start")
 			conn.Write([]byte("ready"))
 		case "Attack":
 			conn.Write([]byte("Attack"))
