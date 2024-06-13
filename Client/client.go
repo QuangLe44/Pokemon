@@ -21,7 +21,7 @@ func main() {
 
 	fmt.Print("Enter your name: ")
 	name, _ := reader.ReadString('\n')
-	name = strings.TrimSpace(name) // Remove newline character
+	name = strings.TrimSpace(name)
 	conn.Write([]byte("Player name: " + name))
 
 	go func() {
@@ -47,7 +47,9 @@ func main() {
 			time.Sleep(5 * time.Second)
 			fmt.Println("You are ready")
 			conn.Write([]byte("ready"))
-
+		case "Attack":
+			conn.Write([]byte("Attack"))
+			fmt.Println("Sent 'Attack' to server")
 		default:
 			if isInteger(message) {
 				fmt.Println(len(clientChoice))

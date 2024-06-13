@@ -30,6 +30,7 @@ type Pokemon struct {
 	CatchRate       int             `json:"catch_rate"`
 	ID              string          `json:"_id"`
 	Name            string          `json:"name"`
+	Experience      int             `json:"experience"`
 }
 
 type AdditionalInfo struct {

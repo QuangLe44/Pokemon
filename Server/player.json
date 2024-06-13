@@ -1,11 +1,411 @@
 [
-    {
+  {
       "name": "Dat",
-      "pokemons": [1,2,3,4,5]
-    },
-    {
-      "name": "Minh",
-      "pokemons": [1,2,3,4]
+      "pokemons": [
+          {
+            "descriptions": [
+                {
+                  "name": "bulbasaur_gen_5",
+                  "resource_uri": "/api/v1/description/15/"
+                }
+              ],
+              "types": [
+                {
+                  "name": "poison",
+                  "resource_uri": "/api/v1/type/4/"
+                },
+                {
+                  "name": "grass",
+                  "resource_uri": "/api/v1/type/12/"
+                }
+              ],
+              "abilities": [
+                {
+                  "name": "chlorophyll",
+                  "resource_uri": "/api/v1/ability/34/"
+                },
+                {
+                  "name": "overgrow",
+                  "resource_uri": "/api/v1/ability/65/"
+                }
+              ],
+              "attack": 49,
+              "defense": 49,
+              "speed": 45,
+              "sp_atk": 65,
+              "sp_def": 65,
+              "hp": 45,
+              "weight": "69",
+              "height": "7",
+              "national_id": 1,
+              "male_female_ratio": "87.5/12.5",
+              "catch_rate": 0,
+              "_id": "1",
+              "name": "Bulbasaur",
+              "experience": 0
+          },
+          {
+            "descriptions": [
+                {
+                  "name": "charmander_gen_5",
+                  "resource_uri": "/api/v1/description/61/"
+                }
+              ],
+              "types": [
+                {
+                  "name": "fire",
+                  "resource_uri": "/api/v1/type/10/"
+                }
+              ],
+              "abilities": [
+                {
+                  "name": "blaze",
+                  "resource_uri": "/api/v1/ability/66/"
+                },
+                {
+                  "name": "solar-power",
+                  "resource_uri": "/api/v1/ability/94/"
+                }
+              ],
+              "attack": 52,
+              "defense": 43,
+              "speed": 65,
+              "sp_atk": 60,
+              "sp_def": 50,
+              "hp": 39,
+              "weight": "85",
+              "height": "6",
+              "national_id": 4,
+              "male_female_ratio": "",
+              "catch_rate": 0,
+              "_id": "4",
+              "name": "Charmander",
+              "experience": 0
+          },
+          {
+            "descriptions": [
+                {
+                  "name": "squirtle_gen_5",
+                  "resource_uri": "/api/v1/description/109/"
+                }
+              ],
+              "types": [
+                {
+                  "name": "water",
+                  "resource_uri": "/api/v1/type/11/"
+                }
+              ],
+            "abilities": [
+              {
+                "name": "rain-dish",
+                "resource_uri": "/api/v1/ability/44/"
+              },
+              {
+                "name": "torrent",
+                "resource_uri": "/api/v1/ability/67/"
+              }
+            ],
+            "attack": 48,
+            "defense": 65,
+            "speed": 43,
+            "sp_atk": 50,
+            "sp_def": 64,
+            "hp": 44,
+            "weight": "90",
+            "height": "5",
+            "national_id": 7,
+            "male_female_ratio": "",
+            "catch_rate": 0,
+            "_id": "7",
+            "name": "Squirtle",
+            "experience": 0
+        },
+        {
+          "descriptions": [
+            {
+              "name": "caterpie_gen_5",
+              "resource_uri": "/api/v1/description/157/"
+            }
+          ],
+          "types": [
+            {
+              "name": "bug",
+              "resource_uri": "/api/v1/type/7/"
+            }
+          ],
+          "abilities": [
+            {
+              "name": "shield-dust",
+              "resource_uri": "/api/v1/ability/19/"
+            },
+            {
+              "name": "run-away",
+              "resource_uri": "/api/v1/ability/50/"
+            }
+          ],
+          "attack": 30,
+          "defense": 35,
+          "speed": 45,
+          "sp_atk": 20,
+          "sp_def": 20,
+          "hp": 45,
+          "weight": "29",
+          "height": "3",
+          "national_id": 10,
+          "male_female_ratio": "",
+          "catch_rate": 0,
+          "_id": "10",
+          "name": "Caterpie",
+          "experience": 0
+      },{
+        "descriptions": [
+          {
+            "name": "beedrill_gen_5",
+            "resource_uri": "/api/v1/description/237/"
+          }
+        ],
+        "types": [
+          {
+            "name": "poison",
+            "resource_uri": "/api/v1/type/4/"
+          },
+          {
+            "name": "bug",
+            "resource_uri": "/api/v1/type/7/"
+          }
+        ],
+        "abilities": [
+          {
+            "name": "swarm",
+            "resource_uri": "/api/v1/ability/68/"
+          },
+          {
+            "name": "sniper",
+            "resource_uri": "/api/v1/ability/97/"
+          }
+        ],
+        "attack": 90,
+        "defense": 40,
+        "speed": 75,
+        "sp_atk": 45,
+        "sp_def": 80,
+        "hp": 65,
+        "weight": "295",
+        "height": "10",
+        "national_id": 15,
+        "male_female_ratio": "",
+        "catch_rate": 0,
+        "_id": "15",
+        "name": "Beedrill",
+        "experience": 0
     }
+      ],
+      "active": [],
+      "ready": false
+  },
+  {
+    "name": "Minh",
+    "pokemons": [
+        {
+          "descriptions": [
+              {
+                "name": "bulbasaur_gen_5",
+                "resource_uri": "/api/v1/description/15/"
+              }
+            ],
+            "types": [
+              {
+                "name": "poison",
+                "resource_uri": "/api/v1/type/4/"
+              },
+              {
+                "name": "grass",
+                "resource_uri": "/api/v1/type/12/"
+              }
+            ],
+            "abilities": [
+              {
+                "name": "chlorophyll",
+                "resource_uri": "/api/v1/ability/34/"
+              },
+              {
+                "name": "overgrow",
+                "resource_uri": "/api/v1/ability/65/"
+              }
+            ],
+            "attack": 49,
+            "defense": 49,
+            "speed": 45,
+            "sp_atk": 65,
+            "sp_def": 65,
+            "hp": 45,
+            "weight": "69",
+            "height": "7",
+            "national_id": 1,
+            "male_female_ratio": "87.5/12.5",
+            "catch_rate": 0,
+            "_id": "1",
+            "name": "Bulbasaur",
+            "experience": 0
+        },
+        {
+          "descriptions": [
+              {
+                "name": "charmander_gen_5",
+                "resource_uri": "/api/v1/description/61/"
+              }
+            ],
+            "types": [
+              {
+                "name": "fire",
+                "resource_uri": "/api/v1/type/10/"
+              }
+            ],
+            "abilities": [
+              {
+                "name": "blaze",
+                "resource_uri": "/api/v1/ability/66/"
+              },
+              {
+                "name": "solar-power",
+                "resource_uri": "/api/v1/ability/94/"
+              }
+            ],
+            "attack": 52,
+            "defense": 43,
+            "speed": 65,
+            "sp_atk": 60,
+            "sp_def": 50,
+            "hp": 39,
+            "weight": "85",
+            "height": "6",
+            "national_id": 4,
+            "male_female_ratio": "",
+            "catch_rate": 0,
+            "_id": "4",
+            "name": "Charmander",
+            "experience": 0
+        },
+        {
+          "descriptions": [
+              {
+                "name": "squirtle_gen_5",
+                "resource_uri": "/api/v1/description/109/"
+              }
+            ],
+            "types": [
+              {
+                "name": "water",
+                "resource_uri": "/api/v1/type/11/"
+              }
+            ],
+          "abilities": [
+            {
+              "name": "rain-dish",
+              "resource_uri": "/api/v1/ability/44/"
+            },
+            {
+              "name": "torrent",
+              "resource_uri": "/api/v1/ability/67/"
+            }
+          ],
+          "attack": 48,
+          "defense": 65,
+          "speed": 43,
+          "sp_atk": 50,
+          "sp_def": 64,
+          "hp": 44,
+          "weight": "90",
+          "height": "5",
+          "national_id": 7,
+          "male_female_ratio": "",
+          "catch_rate": 0,
+          "_id": "7",
+          "name": "Squirtle",
+          "experience": 0
+      },
+      {
+        "descriptions": [
+          {
+            "name": "caterpie_gen_5",
+            "resource_uri": "/api/v1/description/157/"
+          }
+        ],
+        "types": [
+          {
+            "name": "bug",
+            "resource_uri": "/api/v1/type/7/"
+          }
+        ],
+        "abilities": [
+          {
+            "name": "shield-dust",
+            "resource_uri": "/api/v1/ability/19/"
+          },
+          {
+            "name": "run-away",
+            "resource_uri": "/api/v1/ability/50/"
+          }
+        ],
+        "attack": 30,
+        "defense": 35,
+        "speed": 45,
+        "sp_atk": 20,
+        "sp_def": 20,
+        "hp": 45,
+        "weight": "29",
+        "height": "3",
+        "national_id": 10,
+        "male_female_ratio": "",
+        "catch_rate": 0,
+        "_id": "10",
+        "name": "Caterpie",
+        "experience": 0
+    },{
+      "descriptions": [
+        {
+          "name": "beedrill_gen_5",
+          "resource_uri": "/api/v1/description/237/"
+        }
+      ],
+      "types": [
+        {
+          "name": "poison",
+          "resource_uri": "/api/v1/type/4/"
+        },
+        {
+          "name": "bug",
+          "resource_uri": "/api/v1/type/7/"
+        }
+      ],
+      "abilities": [
+        {
+          "name": "swarm",
+          "resource_uri": "/api/v1/ability/68/"
+        },
+        {
+          "name": "sniper",
+          "resource_uri": "/api/v1/ability/97/"
+        }
+      ],
+      "attack": 90,
+      "defense": 40,
+      "speed": 75,
+      "sp_atk": 45,
+      "sp_def": 80,
+      "hp": 65,
+      "weight": "295",
+      "height": "10",
+      "national_id": 15,
+      "male_female_ratio": "",
+      "catch_rate": 0,
+      "_id": "15",
+      "name": "Beedrill",
+      "experience": 0
+  }
+    ],
+    "active": [],
+    "ready": false
+}
 ]
   

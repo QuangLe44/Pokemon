@@ -11,10 +11,12 @@ import (
 )
 
 type Player struct {
-	Name     string `json:"name"`
-	Pokemons []int  `json:"pokemons"`
+	Name     string    `json:"name"`
+	Pokemons []Pokemon `json:"pokemons"`
 	Active   []int
 	Ready    bool
+	Turn     int
+	Conn     net.Conn
 }
 
 type Battle struct {
@@ -24,9 +26,9 @@ type Battle struct {
 }
 
 var (
-	players     []*Player
-	pokemonList []Pokemon
-	mu          sync.Mutex
+	players []*Player
+	mu      sync.Mutex
+	wg      sync.WaitGroup
 )
 
 func main() {
@@ -54,16 +56,24 @@ func main() {
 		}
 
 		fmt.Println("Accepted new connection.")
-		go handleClient(conn, pokemonMap)
+		go handleClient(conn)
 	}
 }
 
-func handleClient(conn net.Conn, pokemonMap map[string]Pokemon) {
+func handleClient(conn net.Conn) {
 	defer conn.Close()
 	player := &Player{}
+	player.Conn = conn
 	mu.Lock()
 	players = append(players, player)
+	playerIndex := len(players) - 1
 	mu.Unlock()
+	defer func() {
+		mu.Lock()
+		defer mu.Unlock()
+		// Remove the player from the players slice when the connection is closed
+		players = append(players[:playerIndex], players[playerIndex+1:]...)
+	}()
 
 	for {
 		buffer := make([]byte, 1024)
@@ -100,24 +110,19 @@ func handleClient(conn net.Conn, pokemonMap map[string]Pokemon) {
 				return
 			}
 			player.Pokemons = foundPlayer.Pokemons
-			for _, pokemonID := range player.Pokemons {
-				idStr := strconv.Itoa(pokemonID)
-				if pokemon, found := pokemonMap[idStr]; found {
-					fmt.Printf("  - %s\n", pokemon.Name)
-				} else {
-					fmt.Printf("  - Unknown Pokemon ID: %d\n", pokemonID)
-				}
-			}
+			// for _, pokemonID := range player.Pokemons {
+			// 	idStr := strconv.Itoa(pokemonID)
+			// 	if pokemon, found := pokemonMap[idStr]; found {
+			// 		fmt.Printf("  - %s\n", pokemon.Name)
+			// 	} else {
+			// 		fmt.Printf("  - Unknown Pokemon ID: %d\n", pokemonID)
+			// 	}
+			// }
 			pokemonListMessage := "\nChoose your pokemons:\n"
 			index := 0
-			for _, pokemonID := range player.Pokemons {
-				idStr := strconv.Itoa(pokemonID)
-				if pokemon, found := pokemonMap[idStr]; found {
-					index++
-					pokemonListMessage += fmt.Sprintf("%d. %s\n", index, pokemon.Name)
-				} else {
-					pokemonListMessage += fmt.Sprintf("  - Unknown Pokemon ID: %d\n", pokemonID)
-				}
+			for _, pokemon := range player.Pokemons {
+				index++
+				pokemonListMessage += fmt.Sprintf("%s. %s\n", pokemon.ID, pokemon.Name)
 			}
 			fmt.Print(pokemonListMessage)
 			conn.Write([]byte(pokemonListMessage))
@@ -147,23 +152,92 @@ func handleClient(conn net.Conn, pokemonMap map[string]Pokemon) {
 			}
 			if allReady {
 				fmt.Println("All players are ready. Starting the game...")
-				go startBattle(pokemonMap)
+				go startBattle()
 			}
 			mu.Unlock()
 		}
 	}
 }
 
-func startBattle(pokemonMap map[string]Pokemon) {
+func startBattle() {
 	mu.Lock()
 	defer mu.Unlock()
 	fmt.Println("Battle start")
-	for _, player := range players {
-		if len(player.Active) > 0 {
-			firstPokemonID := player.Active[0]
-			fmt.Printf("%s's first Pokémon: %s\n", player.Name, pokemonMap[strconv.Itoa(firstPokemonID)].Name)
-		} else {
-			fmt.Printf("No active Pokémon for player %s\n", player.Name)
+	var player1Speed, player2Speed int
+	for n, player := range players {
+		if player == nil {
+			fmt.Printf("Player %d is nil\n", n)
+			continue
 		}
+		if len(player.Active) == 0 {
+			fmt.Printf("Player %d has no active Pokémon\n", n)
+			continue
+		}
+		firstActiveID := strconv.Itoa(player.Active[0])
+		for _, pokemon := range player.Pokemons {
+			if pokemon.ID == firstActiveID {
+				switch n {
+				case 0:
+					fmt.Printf("%s's first Pokémon: %s. Its speed is: %d\n", player.Name, pokemon.Name, pokemon.Speed)
+					player1Speed = pokemon.Speed
+				case 1:
+					fmt.Printf("%s's first Pokémon: %s. Its speed is: %d\n", player.Name, pokemon.Name, pokemon.Speed)
+					player2Speed = pokemon.Speed
+				}
+			}
+		}
+	}
+	if player1Speed > player2Speed || player1Speed == player2Speed {
+		players[0].Turn = 1
+		players[1].Turn = 2
+	} else {
+		players[0].Turn = 2
+		players[1].Turn = 1
+	}
+	currentTurnIndex := 1
+	for {
+		currentPlayer := players[currentTurnIndex-1]
+		if currentPlayer == nil {
+			fmt.Printf("Current player %d is nil\n", currentTurnIndex-1)
+			continue
+		}
+		opponentPlayer := players[2-currentTurnIndex]
+		if opponentPlayer == nil {
+			fmt.Printf("Opponent player %d is nil\n", 2-currentTurnIndex)
+			continue
+		}
+
+		// Send turn message to current player
+		_, err := currentPlayer.Conn.Write([]byte("Your turn! Choose an action:\nSwitch: {pokemon ID}\nAttack\nForfeit\n"))
+		if err != nil {
+			fmt.Println("Error writing to current player:", err)
+			return
+		}
+
+		// Read player's response
+		buffer := make([]byte, 1024)
+		n, err := currentPlayer.Conn.Read(buffer)
+		if err != nil {
+			fmt.Println("Error reading from current player:", err)
+			return
+		}
+		action := strings.TrimSpace(string(buffer[:n]))
+
+		// Process action based on the chosen action
+		processAction(currentPlayer, opponentPlayer, action)
+
+		// Switch turns
+		currentTurnIndex = 2 - currentTurnIndex + 1
+	}
+}
+
+func processAction(currentPlayer, opponentPlayer *Player, action string) {
+	switch action {
+	case "Attack":
+		// Implement attack logic here
+		fmt.Printf("%s is attacking!\n", currentPlayer.Name)
+		// Example: Decrease opponent's health, check for knockouts, etc.
+	default:
+		fmt.Printf("Processing action %s for player %s\n", action, currentPlayer.Name)
 	}
 }
