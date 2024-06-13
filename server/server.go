@@ -152,17 +152,19 @@ func startBattle() {
 
 	assignInitialTurns()
 
-	currentTurnIndex := 0
-	for {
-		currentPlayer := players[currentTurnIndex]
-		opponentPlayer := players[1-currentTurnIndex]
+	// Start with player whose Turn is 1
+	currentPlayer := findPlayerWithTurn(1)
+	opponentPlayer := findPlayerWithTurn(2)
 
+	for {
+		// Send turn message to current player
 		_, err := currentPlayer.Conn.Write([]byte("Your turn! Choose an action:\nSwitch: {pokemon ID}\nAttack\nForfeit\n"))
 		if err != nil {
 			fmt.Println("Error writing to current player:", err)
 			return
 		}
 
+		// Read action from current player
 		buffer := make([]byte, 1024)
 		n, err := currentPlayer.Conn.Read(buffer)
 		if err != nil {
@@ -171,8 +173,19 @@ func startBattle() {
 		}
 		action := strings.TrimSpace(string(buffer[:n]))
 		processAction(currentPlayer, opponentPlayer, action)
-		currentTurnIndex = 1 - currentTurnIndex // Switch turn
+
+		// Switch turn to the opponent
+		currentPlayer, opponentPlayer = opponentPlayer, currentPlayer
 	}
+}
+
+func findPlayerWithTurn(turn int) *Player {
+	for _, p := range players {
+		if p.Turn == turn {
+			return p
+		}
+	}
+	return nil
 }
 
 func assignInitialTurns() {
@@ -183,11 +196,11 @@ func assignInitialTurns() {
 	player2Speed := getSpeedOfFirstActivePokemon(player2)
 
 	if player1Speed >= player2Speed {
-		player1.Turn = 1
-		player2.Turn = 2
+		player1.Turn = 1 // Assign turn 1 to player 1
+		player2.Turn = 2 // Assign turn 2 to player 2
 	} else {
-		player1.Turn = 2
-		player2.Turn = 1
+		player1.Turn = 2 // Assign turn 2 to player 1
+		player2.Turn = 1 // Assign turn 1 to player 2
 	}
 }
 
@@ -195,6 +208,7 @@ func getSpeedOfFirstActivePokemon(player *Player) int {
 	firstActiveID := strconv.Itoa(player.Active[0])
 	for _, pokemon := range player.Pokemons {
 		if pokemon.ID == firstActiveID {
+			fmt.Printf("%s's first pokemon speed is: %d\n", player.Name, pokemon.Speed)
 			return pokemon.Speed
 		}
 	}
@@ -205,7 +219,7 @@ func processAction(currentPlayer, opponentPlayer *Player, action string) {
 	switch strings.ToLower(action) {
 	case "attack":
 		rand.Seed(time.Now().UnixNano())
-		damage := rand.Intn(10) + 1 // Random damage between 1 and 10
+		damage := calculateDamage(currentPlayer, opponentPlayer)
 		opponentPlayer.Health[0] -= damage
 		fmt.Printf("%s attacked and dealt %d damage to %s's first Pokémon. Remaining HP: %d\n", currentPlayer.Name, damage, opponentPlayer.Name, opponentPlayer.Health[0])
 
@@ -242,6 +256,40 @@ func processAction(currentPlayer, opponentPlayer *Player, action string) {
 		currentPlayer.Conn.Close()
 		opponentPlayer.Conn.Close()
 	}
+}
+func calculateDamage(currentPlayer, opponentPlayer *Player) int {
+	currentPokemon := findPokemonByID(currentPlayer.Active[0], currentPlayer)
+	opponentPokemon := findPokemonByID(opponentPlayer.Active[0], opponentPlayer)
+	if currentPokemon == nil || opponentPokemon == nil {
+		return 0
+	}
+
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	attackType := r.Intn(2)
+
+	var damage int
+	if attackType == 0 {
+		// Normal attack
+		damage = currentPokemon.Attack - opponentPokemon.Defense
+	} else {
+		// Special attack
+		damage = currentPokemon.SpAtk*2 - opponentPokemon.SpDef
+	}
+
+	if damage < 0 {
+		damage = 0
+	}
+
+	return damage
+}
+func findPokemonByID(id int, player *Player) *Pokemon {
+	for _, pokemon := range player.Pokemons {
+		if pokemon.ID == strconv.Itoa(id) {
+			return &pokemon
+		}
+	}
+	return nil
 }
 
 func switchToNextPokemon(player *Player) bool {
