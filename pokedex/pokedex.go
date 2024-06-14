@@ -106,11 +106,11 @@ type Experience struct {
 type PokemonInfo struct {
 	Pokemon      *Pokemon        `json:"pokemon"`
 	Additional   *AdditionalInfo `json:"additional_info"`
+	Experience   *Experience     `json:"experience"`
 	Description  *Description    `json:"description"`
 	Evolution    *Evolution      `json:"evolution"`
 	TypeInfo     *Mult           `json:"type_info"`
 	MonsterMoves *MonsterMoves   `json:"monster_moves"`
-	Experience   *Experience     `json:"experience"`
 }
 
 func LoadPokemonData(filename string) ([]Pokemon, error) {
@@ -350,50 +350,50 @@ func Pokedex(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolutio
 }
 
 func main() {
-	pokemonFile := "data/baseInfo.json"
+	pokemonFile := "../data/baseInfo.json"
 	pokemons, err := LoadPokemonData(pokemonFile)
 	if err != nil {
 		log.Fatalf("Failed to load Pokemon data: %s", err)
 	}
 
-	additionalInfoFile := "data/stats.json"
+	additionalInfoFile := "../data/stats.json"
 	additionalInfo, err := loadAdditionalInfo(additionalInfoFile)
 	if err != nil {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
-	descriptionFile := "data/MonsterDescription.json"
+	descriptionFile := "../data/MonsterDescription.json"
 	description, err := loadDescription(descriptionFile)
 	if err != nil {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
-	evoFile := "data/evolution.json"
+	evoFile := "../data/evolution.json"
 	evo, err := loadEvo(evoFile)
 	if err != nil {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
-	typeFile := "data/MonsterType.json"
+	typeFile := "../data/MonsterType.json"
 	mult, err := loadType(typeFile)
 	if err != nil {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
-	monsterMovesFile := "data/monsterMoves.json"
+	monsterMovesFile := "../data/monsterMoves.json"
 	monsterMove, err := loadMonsterMove(monsterMovesFile)
 	if err != nil {
 		log.Fatalf("Failed to load additional information: %s", err)
 	}
 
-	moveInfoFile := "data/moves.json"
+	moveInfoFile := "../data/moves.json"
 	moveInfo, err := loadMoveInfo(moveInfoFile)
 	if err != nil {
 		fmt.Println("Error loading move details:", err)
 		return
 	}
 
-	experienceFile := "data/exp.json"
+	experienceFile := "../data/exp.json"
 	experience, err := loadExperience(experienceFile)
 	if err != nil {
 		log.Fatalf("Failed to load experience information: %s", err)
@@ -418,7 +418,7 @@ func main() {
 		return
 	}
 
-	err = ioutil.WriteFile("data/pokedex.json", jsonData, 0644)
+	err = ioutil.WriteFile("../data/pokedex.json", jsonData, 0644)
 	if err != nil {
 		fmt.Printf("Error writing JSON to file: %s\n", err)
 		return

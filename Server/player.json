@@ -42,7 +42,7 @@
               "catch_rate": 0,
               "_id": "1",
               "name": "Bulbasaur",
-              "experience": 0
+              "experience": 64
           },
           {
             "descriptions": [
@@ -80,7 +80,7 @@
               "catch_rate": 0,
               "_id": "4",
               "name": "Charmander",
-              "experience": 0
+              "experience": 62
           },
           {
             "descriptions": [
@@ -118,7 +118,7 @@
             "catch_rate": 0,
             "_id": "7",
             "name": "Squirtle",
-            "experience": 0
+            "experience": 63
         },
         {
           "descriptions": [
@@ -156,7 +156,7 @@
           "catch_rate": 0,
           "_id": "10",
           "name": "Caterpie",
-          "experience": 0
+          "experience": 39
       },{
         "descriptions": [
           {
@@ -197,7 +197,7 @@
         "catch_rate": 0,
         "_id": "15",
         "name": "Beedrill",
-        "experience": 0
+        "experience": 198
     }
       ],
       "active": [],
@@ -246,7 +246,7 @@
             "catch_rate": 0,
             "_id": "1",
             "name": "Bulbasaur",
-            "experience": 0
+            "experience": 64
         },
         {
           "descriptions": [
@@ -284,7 +284,7 @@
             "catch_rate": 0,
             "_id": "4",
             "name": "Charmander",
-            "experience": 0
+            "experience": 62
         },
         {
           "descriptions": [
@@ -322,7 +322,7 @@
           "catch_rate": 0,
           "_id": "7",
           "name": "Squirtle",
-          "experience": 0
+          "experience": 63
       },
       {
         "descriptions": [
@@ -360,7 +360,7 @@
         "catch_rate": 0,
         "_id": "10",
         "name": "Caterpie",
-        "experience": 0
+        "experience": 39
     },{
       "descriptions": [
         {
@@ -401,7 +401,7 @@
       "catch_rate": 0,
       "_id": "15",
       "name": "Beedrill",
-      "experience": 0
+      "experience": 198
   }
     ],
     "active": [],
