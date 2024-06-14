@@ -341,11 +341,11 @@ func Pokedex(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolutio
 	return PokemonInfo{
 		Pokemon:      pokemon,
 		Additional:   info,
+		Experience:   exp,
 		Description:  desc,
 		Evolution:    evolution,
 		TypeInfo:     mult,
 		MonsterMoves: monstermove,
-		Experience:   exp,
 	}
 }
 
