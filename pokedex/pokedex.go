@@ -106,11 +106,11 @@ type Experience struct {
 type PokemonInfo struct {
 	Pokemon      *Pokemon        `json:"pokemon"`
 	Additional   *AdditionalInfo `json:"additional_info"`
+	Experience   *Experience     `json:"experience"`
 	Description  *Description    `json:"description"`
 	Evolution    *Evolution      `json:"evolution"`
 	TypeInfo     *Mult           `json:"type_info"`
 	MonsterMoves *MonsterMoves   `json:"monster_moves"`
-	Experience   *Experience     `json:"experience"`
 }
 
 func LoadPokemonData(filename string) ([]Pokemon, error) {
@@ -341,11 +341,11 @@ func Pokedex(pokemon *Pokemon, info *AdditionalInfo, desc *Description, evolutio
 	return PokemonInfo{
 		Pokemon:      pokemon,
 		Additional:   info,
+		Experience:   exp,
 		Description:  desc,
 		Evolution:    evolution,
 		TypeInfo:     mult,
 		MonsterMoves: monstermove,
-		Experience:   exp,
 	}
 }
 
